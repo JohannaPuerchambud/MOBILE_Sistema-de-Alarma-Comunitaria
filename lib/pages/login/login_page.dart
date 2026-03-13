@@ -29,11 +29,15 @@ class _LoginPageState extends State<LoginPage> {
     if (!mounted) return;
 
     if (token != null && token.isNotEmpty) {
+      // Guardamos el token de forma segura
       await _storage.saveToken(token);
 
       if (!mounted) return;
-      Navigator.of(context).pushReplacement(
+
+      // ✅ Aquí está el cambio: Limpiamos todo el historial de navegación
+      Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => HomePage()),
+            (route) => false, // Al devolver false, eliminamos todas las rutas previas
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(

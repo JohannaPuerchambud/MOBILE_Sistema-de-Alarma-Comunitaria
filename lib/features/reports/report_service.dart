@@ -19,17 +19,20 @@ class ReportService {
       },
     );
 
-    if (res.statusCode != 200) {
-      throw Exception("Error al cargar reportes: ${res.body}");
+    if (res.statusCode == 200) {
+      final List data = json.decode(res.body);
+      return data.map((e) => ReportModel.fromJson(e)).toList();
+    } else {
+      // ✅ Extraemos el mensaje limpio del backend
+      final errorData = json.decode(res.body);
+      throw Exception(errorData['message'] ?? "Error al cargar reportes.");
     }
-
-    final List data = json.decode(res.body);
-    return data.map((e) => ReportModel.fromJson(e)).toList();
   }
 
   Future<void> createReport({
     required String title,
     required String description,
+    String? imageUrl, // ✅ Agregamos este parámetro opcional
   }) async {
     final token = await TokenStorage().getToken();
 
@@ -45,11 +48,13 @@ class ReportService {
       body: json.encode({
         "title": title,
         "description": description,
+        "image_url": imageUrl, // ✅ Lo enviamos al backend
       }),
     );
 
     if (res.statusCode != 201) {
-      throw Exception("Error al crear reporte: ${res.body}");
+      final errorData = json.decode(res.body);
+      throw Exception(errorData['message'] ?? "Error al crear reporte.");
     }
   }
 }
