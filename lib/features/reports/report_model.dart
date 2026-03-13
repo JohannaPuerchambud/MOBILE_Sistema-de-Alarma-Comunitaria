@@ -6,6 +6,7 @@ class ReportModel {
   final DateTime createdAt;
   final String? name;
   final String? lastName;
+  final String? imageUrl;
 
   ReportModel({
     required this.reportId,
@@ -15,6 +16,7 @@ class ReportModel {
     required this.createdAt,
     this.name,
     this.lastName,
+    this.imageUrl,
   });
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
@@ -26,6 +28,7 @@ class ReportModel {
       createdAt: DateTime.parse(json['created_at']),
       name: json['name'],
       lastName: json['last_name'],
+      imageUrl: json['image_url'],
     );
   }
 }

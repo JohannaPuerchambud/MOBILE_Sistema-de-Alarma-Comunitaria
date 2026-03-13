@@ -149,6 +149,31 @@ class _ReportListPageState extends State<ReportListPage> {
                     const SizedBox(height: 6),
                     Text(r.description),
                     const SizedBox(height: 8),
+                    if (r.imageUrl != null && r.imageUrl!.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          r.imageUrl!,
+                          height: 150, // Altura fija para no descuadrar la lista
+                          width: double.infinity,
+                          fit: BoxFit.cover, // Para que llene el espacio bonito
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const SizedBox(
+                              height: 150,
+                              child: Center(child: CircularProgressIndicator()),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) =>
+                          const SizedBox(
+                              height: 150,
+                              child: Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 40))
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Text(
                       "${_formatDate(r.createdAt)}"
                           "${author.isNotEmpty ? " • $author" : ""}",
