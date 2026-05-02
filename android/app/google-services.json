@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "469693571333",
+    "project_id": "alarmacomunitaria-utn-5e6be",
+    "storage_bucket": "alarmacomunitaria-utn-5e6be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:469693571333:android:a928e8dc4f50a90846176c",
+        "android_client_info": {
+          "package_name": "com.community.alarm.app_mobile_sistema_alarma"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVmDbjz-z-tFZPJ4o14t2mf43oTqHbjpY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
