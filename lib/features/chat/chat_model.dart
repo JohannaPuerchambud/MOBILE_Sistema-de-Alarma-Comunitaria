@@ -4,6 +4,7 @@ class ChatMessage {
   final String name;
   final String? lastName;
   final String message;
+  final String? imageUrl;
   final DateTime createdAt;
 
   ChatMessage({
@@ -12,6 +13,7 @@ class ChatMessage {
     required this.name,
     this.lastName,
     required this.message,
+    this.imageUrl,
     required this.createdAt,
   });
 
@@ -22,6 +24,7 @@ class ChatMessage {
       name: (json['name'] ?? '') as String,
       lastName: json['last_name'] as String?,
       message: (json['message'] ?? '') as String,
+      imageUrl: json['image_url'] as String?,
       createdAt: DateTime.tryParse((json['created_at'] ?? '').toString()) ??
           DateTime.now(),
     );
@@ -31,4 +34,6 @@ class ChatMessage {
     final ln = (lastName ?? '').trim();
     return ln.isEmpty ? name : '$name $ln';
   }
+
+  bool get hasImage => imageUrl != null && imageUrl!.isNotEmpty;
 }

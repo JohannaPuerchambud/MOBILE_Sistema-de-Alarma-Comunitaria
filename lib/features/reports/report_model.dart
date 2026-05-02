@@ -7,6 +7,7 @@ class ReportModel {
   final String? name;
   final String? lastName;
   final String? imageUrl;
+  final String? address;
 
   ReportModel({
     required this.reportId,
@@ -17,6 +18,7 @@ class ReportModel {
     this.name,
     this.lastName,
     this.imageUrl,
+    this.address,
   });
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
@@ -29,6 +31,7 @@ class ReportModel {
       name: json['name'],
       lastName: json['last_name'],
       imageUrl: json['image_url'],
+      address: json['address'],
     );
   }
 }

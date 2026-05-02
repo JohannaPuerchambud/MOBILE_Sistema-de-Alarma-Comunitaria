@@ -16,7 +16,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
   final _titleCtrl = TextEditingController();
   final _descCtrl = TextEditingController();
 
-  // ✅ Variables para la imagen
+  // Variables para la imagen
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
 
@@ -30,33 +30,67 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     super.dispose();
   }
 
-  // ✅ Método para seleccionar imagen de la galería
-  Future<void> _pickImage() async {
-    final XFile? pickedFile = await _picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 70, // Comprimimos un poco para que suba rápido
+  // ✅ NUEVO: Menú para elegir entre Cámara y Galería
+  void _showImageSourceActionSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => SafeArea(
+        child: Wrap(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF667EEA)),
+              title: const Text('Tomar foto con la cámara', style: TextStyle(fontWeight: FontWeight.w500)),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                _pickImage(ImageSource.camera); // Llama a la cámara
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined, color: Color(0xFF667EEA)),
+              title: const Text('Elegir de la galería', style: TextStyle(fontWeight: FontWeight.w500)),
+              onTap: () {
+                Navigator.pop(context); // Cierra el menú
+                _pickImage(ImageSource.gallery); // Llama a la galería
+              },
+            ),
+          ],
+        ),
+      ),
     );
+  }
 
-    if (pickedFile != null) {
-      setState(() {
-        _imageFile = File(pickedFile.path);
-      });
+  // ✅ ACTUALIZADO: Recibe de dónde viene la imagen (Cámara o Galería)
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final XFile? pickedFile = await _picker.pickImage(
+        source: source,
+        imageQuality: 60,
+        maxWidth: 800,
+        maxHeight: 800,
+      );
+
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = File(pickedFile.path);
+        });
+      }
+    } catch (e) {
+      setState(() => error = "Error al abrir la cámara/galería. Revisa los permisos.");
     }
   }
 
-  // ✅ Método para subir la imagen a Firebase Storage y obtener la URL
+  // Método para subir la imagen a Firebase Storage y obtener la URL
   Future<String?> _uploadImageToFirebase() async {
     if (_imageFile == null) return null;
 
     try {
-      // Creamos un nombre único para la imagen basado en la fecha y hora
       final fileName = 'evidencia_${DateTime.now().millisecondsSinceEpoch}.jpg';
       final ref = FirebaseStorage.instance.ref().child('reports/$fileName');
 
-      // Subimos el archivo
       final uploadTask = await ref.putFile(_imageFile!);
-
-      // Obtenemos el link de descarga público
       final downloadUrl = await uploadTask.ref.getDownloadURL();
       return downloadUrl;
     } catch (e) {
@@ -90,7 +124,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
       await _service.createReport(
         title: title,
         description: desc,
-        imageUrl: imageUrl, // ✅ Enviamos la URL si existe
+        imageUrl: imageUrl,
       );
 
       if (!mounted) return;
@@ -108,84 +142,174 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Nuevo reporte")),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView( // ✅ Añadido para que no marque error de espacio si el teclado se abre
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                controller: _titleCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Título",
-                  hintText: "Ej: Robo / Sospechoso / Ruido / Emergencia",
-                ),
-                maxLength: 100,
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _descCtrl,
-                decoration: const InputDecoration(
-                  labelText: "Descripción",
-                  hintText: "Describe lo ocurrido…",
-                ),
-                maxLines: 4,
-              ),
-              const SizedBox(height: 20),
+      appBar: AppBar(
+        title: const Text("Nuevo Reporte",
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        iconTheme: const IconThemeData(color: Colors.white),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: Container(
+        color: const Color(0xFFF4F6F9),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Card(
+              elevation: 4,
+              shadowColor: Colors.black26,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text("Título de la alerta", style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF555555),
+                        fontSize: 14)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _titleCtrl,
+                      decoration: InputDecoration(
+                        hintText: "Ej: Sospechoso / Ruido / Emergencia",
+                        filled: true,
+                        fillColor: const Color(0xFFF8F9FA),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                                color: Color(0xFFE0E0E0), width: 1.5)),
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                                color: Color(0xFF667EEA), width: 2)),
+                      ),
+                      maxLength: 100,
+                    ),
+                    const SizedBox(height: 10),
 
-              // ✅ Botón y vista previa de la imagen
-              Text("Evidencia fotográfica (Opcional):", style: TextStyle(fontWeight: FontWeight.bold, color: Colors.grey[700])),
-              const SizedBox(height: 10),
-              GestureDetector(
-                onTap: loading ? null : _pickImage,
-                child: Container(
-                  height: 150,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[200],
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: _imageFile != null
-                      ? ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.file(_imageFile!, fit: BoxFit.cover),
-                  )
-                      : const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.camera_alt, size: 40, color: Colors.grey),
-                      SizedBox(height: 8),
-                      Text("Toca para añadir foto", style: TextStyle(color: Colors.grey)),
-                    ],
-                  ),
+                    const Text("Descripción detallada", style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF555555),
+                        fontSize: 14)),
+                    const SizedBox(height: 8),
+                    TextField(
+                      controller: _descCtrl,
+                      decoration: InputDecoration(
+                        hintText: "Describe lo ocurrido detalladamente...",
+                        filled: true,
+                        fillColor: const Color(0xFFF8F9FA),
+                        enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                                color: Color(0xFFE0E0E0), width: 1.5)),
+                        focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: const BorderSide(
+                                color: Color(0xFF667EEA), width: 2)),
+                      ),
+                      maxLines: 4,
+                    ),
+                    const SizedBox(height: 20),
+
+                    const Text("Evidencia fotográfica (Opcional)",
+                        style: TextStyle(fontWeight: FontWeight.w600,
+                            color: Color(0xFF555555),
+                            fontSize: 14)),
+                    const SizedBox(height: 10),
+                    GestureDetector(
+                      // ✅ LLAMAMOS AL NUEVO MENÚ EN LUGAR DE ABRIR DIRECTO LA GALERÍA
+                      onTap: loading ? null : _showImageSourceActionSheet,
+                      child: Container(
+                        height: 180,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          border: Border.all(color: const Color(0xFFE0E0E0),
+                              width: 2,
+                              style: BorderStyle.solid),
+                          borderRadius: BorderRadius.circular(15),
+                        ),
+                        child: _imageFile != null
+                            ? ClipRRect(
+                          borderRadius: BorderRadius.circular(13),
+                          child: Image.file(_imageFile!, fit: BoxFit.cover),
+                        )
+                            : const Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.add_a_photo_outlined, size: 50,
+                                color: Color(0xFF999999)),
+                            SizedBox(height: 12),
+                            Text("Toca para tomar o subir una foto", style: TextStyle(
+                                color: Color(0xFF777777),
+                                fontWeight: FontWeight.w500)),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (_imageFile != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                            onPressed: loading ? null : () =>
+                                setState(() => _imageFile = null),
+                            icon: const Icon(Icons.delete_outline,
+                                color: Colors.redAccent),
+                            label: const Text("Quitar foto",
+                                style: TextStyle(color: Colors.redAccent))
+                        ),
+                      ),
+                    const SizedBox(height: 16),
+
+                    if (error != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16.0),
+                        child: Text(error!, style: const TextStyle(color: Colors
+                            .redAccent, fontWeight: FontWeight.bold)),
+                      ),
+
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                          ),
+                        ),
+                        child: ElevatedButton(
+                          onPressed: loading ? null : _submit,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.transparent,
+                            shadowColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: loading
+                              ? const SizedBox(height: 24,
+                              width: 24,
+                              child: CircularProgressIndicator(
+                                  color: Colors.white, strokeWidth: 2.5))
+                              : const Text("Enviar Reporte", style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white)),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              if (_imageFile != null)
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton.icon(
-                      onPressed: loading ? null : () => setState(() => _imageFile = null),
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      label: const Text("Quitar foto", style: TextStyle(color: Colors.red))
-                  ),
-                ),
-
-              const SizedBox(height: 16),
-              if (error != null)
-                Text(error!, style: const TextStyle(color: Colors.red)),
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: loading ? null : _submit,
-                  child: Text(loading ? "Subiendo reporte y foto..." : "Enviar reporte"),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

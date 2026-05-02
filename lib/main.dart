@@ -1,11 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 
 import 'core/auth/token_storage.dart';
 import 'pages/login/login_page.dart';
 import 'pages/home/home_page.dart';
+import 'package:intl/date_symbol_data_local.dart';
+
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print("💌 Notificación con app cerrada recibida: ${message.notification?.title}");
+}
+
+// ✅ Clave global del Navigator para mostrar SnackBars desde FCM
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -13,6 +24,8 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await initializeDateFormatting('es_ES', null);
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   runApp(const MyApp());
 }
@@ -22,9 +35,10 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: AuthGate(),
+      navigatorKey: navigatorKey,
+      home: const AuthGate(),
     );
   }
 }
@@ -51,7 +65,7 @@ class AuthGate extends StatelessWidget {
         }
 
         return snapshot.data == true
-            ? HomePage()
+            ? const HomePage()
             : const LoginPage();
       },
     );

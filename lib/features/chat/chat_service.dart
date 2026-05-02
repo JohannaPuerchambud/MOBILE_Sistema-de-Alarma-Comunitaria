@@ -77,10 +77,19 @@ class ChatService {
     _socket!.connect();
   }
 
-  void sendMessage(String text) {
+  void sendMessage(String text, {String? imageUrl}) {
     final msg = text.trim();
-    if (msg.isEmpty) return;
-    _socket?.emit("send_message", {"message": msg});
+    if (msg.isEmpty && (imageUrl == null || imageUrl.isEmpty)) return;
+
+    final payload = <String, dynamic>{
+      "message": msg.isNotEmpty ? msg : "📷 Foto",
+    };
+
+    if (imageUrl != null && imageUrl.isNotEmpty) {
+      payload["image_url"] = imageUrl;
+    }
+
+    _socket?.emit("send_message", payload);
   }
 
   void disconnect() {
