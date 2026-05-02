@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 
 import '../../core/config/api.dart';
@@ -29,28 +30,39 @@ class ReportService {
     }
   }
 
+  /// ✅ ACTUALIZADO: Ahora envía la imagen como multipart/form-data
+  /// al backend, que se encarga de subirla a Firebase Storage de forma segura.
   Future<void> createReport({
     required String title,
     required String description,
-    String? imageUrl, // ✅ Agregamos este parámetro opcional
+    File? imageFile, // ✅ Cambiado de String? imageUrl a File? imageFile
   }) async {
     final token = await TokenStorage().getToken();
 
     if (token == null) throw Exception("No hay token, inicia sesión.");
 
     final url = Uri.parse("${ApiConfig.baseUrl}/reports");
-    final res = await http.post(
-      url,
-      headers: {
-        "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      },
-      body: json.encode({
-        "title": title,
-        "description": description,
-        "image_url": imageUrl, // ✅ Lo enviamos al backend
-      }),
-    );
+
+    // Usar multipart request para enviar imagen + datos
+    final request = http.MultipartRequest("POST", url);
+    request.headers["Authorization"] = "Bearer $token";
+
+    // Campos de texto
+    request.fields["title"] = title;
+    request.fields["description"] = description;
+
+    // Adjuntar imagen si existe
+    if (imageFile != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          "image", // Debe coincidir con el nombre en multer (.single("image"))
+          imageFile.path,
+        ),
+      );
+    }
+
+    final streamedResponse = await request.send();
+    final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {
       final errorData = json.decode(res.body);

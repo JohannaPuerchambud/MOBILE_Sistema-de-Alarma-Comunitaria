@@ -1,10 +1,12 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:http/http.dart' as http;
 
+import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
 import 'chat_service.dart';
 import 'chat_model.dart';
@@ -164,7 +166,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  // ✅ Seleccionar foto, comprimir, subir a Firebase y enviar al chat
+  // ✅ Seleccionar foto, comprimir, subir al backend y enviar URL al chat
   Future<void> _pickAndSendImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -178,17 +180,28 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
       setState(() => _uploadingImage = true);
 
-      // Subir a Firebase Storage
-      final file = File(pickedFile.path);
-      final fileName = 'chat_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = FirebaseStorage.instance.ref().child('chat_images/$fileName');
-      final uploadTask = await ref.putFile(file);
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
+      // ✅ Subir imagen al backend (que la sube a Firebase Storage con Admin SDK)
+      final token = await TokenStorage().getToken();
+      final url = Uri.parse("${ApiConfig.baseUrl}/chat/upload-image");
+      final request = http.MultipartRequest("POST", url);
+      request.headers["Authorization"] = "Bearer $token";
+      request.files.add(
+        await http.MultipartFile.fromPath("image", pickedFile.path),
+      );
 
-      // Enviar mensaje con imagen
-      _chatService.sendMessage('', imageUrl: downloadUrl);
+      final streamedRes = await request.send();
+      final res = await http.Response.fromStream(streamedRes);
 
-      _scrollToBottomDelayed();
+      if (res.statusCode == 200) {
+        final data = json.decode(res.body);
+        final downloadUrl = data['image_url'];
+
+        // Enviar mensaje con imagen via Socket.IO
+        _chatService.sendMessage('', imageUrl: downloadUrl);
+        _scrollToBottomDelayed();
+      } else {
+        _snack("Error al subir la imagen.");
+      }
     } catch (e) {
       _snack("Error al enviar la imagen. Intenta de nuevo.");
     } finally {

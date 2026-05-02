@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'report_service.dart';
 
 class ReportCreatePage extends StatefulWidget {
@@ -30,7 +29,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     super.dispose();
   }
 
-  // ✅ NUEVO: Menú para elegir entre Cámara y Galería
+  // ✅ Menú para elegir entre Cámara y Galería
   void _showImageSourceActionSheet() {
     showModalBottomSheet(
       context: context,
@@ -62,7 +61,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     );
   }
 
-  // ✅ ACTUALIZADO: Recibe de dónde viene la imagen (Cámara o Galería)
+  // ✅ Recibe de dónde viene la imagen (Cámara o Galería)
   Future<void> _pickImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -82,22 +81,6 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     }
   }
 
-  // Método para subir la imagen a Firebase Storage y obtener la URL
-  Future<String?> _uploadImageToFirebase() async {
-    if (_imageFile == null) return null;
-
-    try {
-      final fileName = 'evidencia_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final ref = FirebaseStorage.instance.ref().child('reports/$fileName');
-
-      final uploadTask = await ref.putFile(_imageFile!);
-      final downloadUrl = await uploadTask.ref.getDownloadURL();
-      return downloadUrl;
-    } catch (e) {
-      throw Exception("Error al subir la imagen: $e");
-    }
-  }
-
   Future<void> _submit() async {
     final title = _titleCtrl.text.trim();
     final desc = _descCtrl.text.trim();
@@ -113,18 +96,12 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     });
 
     try {
-      String? imageUrl;
-
-      // 1. Si hay imagen, la subimos primero a Firebase
-      if (_imageFile != null) {
-        imageUrl = await _uploadImageToFirebase();
-      }
-
-      // 2. Enviamos todo a nuestro backend Node.js
+      // ✅ Enviamos todo al backend (incluida la imagen como archivo)
+      // El backend se encarga de subir la imagen a Firebase Storage de forma segura
       await _service.createReport(
         title: title,
         description: desc,
-        imageUrl: imageUrl,
+        imageFile: _imageFile, // ✅ Enviamos el archivo directamente
       );
 
       if (!mounted) return;
@@ -225,7 +202,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                             fontSize: 14)),
                     const SizedBox(height: 10),
                     GestureDetector(
-                      // ✅ LLAMAMOS AL NUEVO MENÚ EN LUGAR DE ABRIR DIRECTO LA GALERÍA
+                      // ✅ LLAMAMOS AL MENÚ PARA ELEGIR CÁMARA O GALERÍA
                       onTap: loading ? null : _showImageSourceActionSheet,
                       child: Container(
                         height: 180,

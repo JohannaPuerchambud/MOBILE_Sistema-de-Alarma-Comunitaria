@@ -44,6 +44,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _showEmergencyConfirmation() {
     final justificationCtrl = TextEditingController();
     bool loading = false;
+    String? modalError;
 
     showModalBottomSheet(
       context: context,
@@ -60,135 +61,159 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
             ),
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Barra decorativa
-                Container(
-                  width: 40, height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Ícono de alerta
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(Icons.warning_rounded, size: 48, color: Colors.redAccent),
-                ),
-                const SizedBox(height: 16),
-
-                const Text(
-                  "⚠️ ¿Estás seguro?",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  "Esto activará la sirena del barrio y alertará a todos los vecinos.",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
-                ),
-                const SizedBox(height: 20),
-
-                // Campo de justificación
-                TextField(
-                  controller: justificationCtrl,
-                  maxLines: 3,
-                  maxLength: 200,
-                  decoration: InputDecoration(
-                    hintText: "¿Por qué estás activando la alarma?",
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    filled: true,
-                    fillColor: const Color(0xFFF8F9FA),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Barra decorativa
+                  Container(
+                    width: 40, height: 4,
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300],
+                      borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
+                  const SizedBox(height: 20),
 
-                // Botón de activar
-                SizedBox(
-                  width: double.infinity,
-                  height: 55,
-                  child: ElevatedButton.icon(
-                    onPressed: loading
-                        ? null
-                        : () async {
-                            final justification = justificationCtrl.text.trim();
-                            if (justification.isEmpty) {
-                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                const SnackBar(content: Text("Escribe el motivo de la emergencia")),
-                              );
-                              return;
-                            }
-
-                            setModalState(() => loading = true);
-
-                            try {
-                              // Obtener ubicación
-                              final position = await EmergencyService.getCurrentLocation();
-
-                              // Enviar emergencia al backend
-                              await EmergencyService.triggerEmergency(
-                                justification: justification,
-                                latitude: position.latitude,
-                                longitude: position.longitude,
-                              );
-
-                              if (!ctx.mounted) return;
-                              Navigator.pop(ctx);
-
-                              // Mostrar confirmación
-                              _showEmergencySuccess();
-                            } catch (e) {
-                              setModalState(() => loading = false);
-                              if (!ctx.mounted) return;
-                              ScaffoldMessenger.of(ctx).showSnackBar(
-                                SnackBar(content: Text(e.toString().replaceFirst("Exception: ", ""))),
-                              );
-                            }
-                          },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.redAccent,
-                      foregroundColor: Colors.white,
-                      elevation: 4,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  // Ícono de alerta
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
                     ),
-                    icon: loading
-                        ? const SizedBox(
-                            width: 20, height: 20,
-                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                          )
-                        : const Icon(Icons.campaign_rounded, size: 24),
-                    label: Text(
-                      loading ? "Activando..." : "ACTIVAR ALARMA",
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    child: const Icon(Icons.warning_rounded, size: 48, color: Colors.redAccent),
+                  ),
+                  const SizedBox(height: 16),
+
+                  const Text(
+                    "⚠️ ¿Estás seguro?",
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                  ),
+                  const SizedBox(height: 8),
+                  const Text(
+                    "Esto activará la sirena del barrio y alertará a todos los vecinos.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Campo de justificación
+                  TextField(
+                    controller: justificationCtrl,
+                    maxLines: 3,
+                    maxLength: 200,
+                    decoration: InputDecoration(
+                      hintText: "¿Por qué estás activando la alarma?",
+                      hintStyle: const TextStyle(color: Colors.grey),
+                      filled: true,
+                      fillColor: const Color(0xFFF8F9FA),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 12),
+                  const SizedBox(height: 8),
 
-                // Botón cancelar
-                TextButton(
-                  onPressed: loading ? null : () => Navigator.pop(ctx),
-                  child: const Text(
-                    "Cancelar",
-                    style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w600),
+                  // ✅ Error de validación dentro del modal (no SnackBar)
+                  if (modalError != null)
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              modalError!,
+                              style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                  const SizedBox(height: 8),
+
+                  // Botón de activar
+                  SizedBox(
+                    width: double.infinity,
+                    height: 55,
+                    child: ElevatedButton.icon(
+                      onPressed: loading
+                          ? null
+                          : () async {
+                              final justification = justificationCtrl.text.trim();
+                              if (justification.isEmpty) {
+                                setModalState(() {
+                                  modalError = "Escribe el motivo de la emergencia";
+                                });
+                                return;
+                              }
+
+                              setModalState(() {
+                                loading = true;
+                                modalError = null;
+                              });
+
+                              try {
+                                // Obtener ubicación
+                                final position = await EmergencyService.getCurrentLocation();
+
+                                // Enviar emergencia al backend
+                                await EmergencyService.triggerEmergency(
+                                  justification: justification,
+                                  latitude: position.latitude,
+                                  longitude: position.longitude,
+                                );
+
+                                if (!ctx.mounted) return;
+                                Navigator.pop(ctx);
+
+                                // Mostrar confirmación
+                                _showEmergencySuccess();
+                              } catch (e) {
+                                setModalState(() {
+                                  loading = false;
+                                  modalError = e.toString().replaceFirst("Exception: ", "");
+                                });
+                              }
+                            },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.redAccent,
+                        foregroundColor: Colors.white,
+                        elevation: 4,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      ),
+                      icon: loading
+                          ? const SizedBox(
+                              width: 20, height: 20,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                            )
+                          : const Icon(Icons.campaign_rounded, size: 24),
+                      label: Text(
+                        loading ? "Activando..." : "ACTIVAR ALARMA",
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 12),
+
+                  // Botón cancelar
+                  TextButton(
+                    onPressed: loading ? null : () => Navigator.pop(ctx),
+                    child: const Text(
+                      "Cancelar",
+                      style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
