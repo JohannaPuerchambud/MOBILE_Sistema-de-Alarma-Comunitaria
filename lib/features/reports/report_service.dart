@@ -7,6 +7,38 @@ import '../../core/auth/token_storage.dart';
 import 'report_model.dart';
 
 class ReportService {
+  /// ✅ Helper: decodifica JSON de forma segura.
+  /// Si el servidor devuelve HTML (ej. Render dormido), lanza un mensaje claro.
+  dynamic _safeJsonDecode(String body) {
+    final trimmed = body.trim();
+    if (trimmed.startsWith('<!') || trimmed.startsWith('<html')) {
+      throw Exception(
+        "El servidor no está disponible en este momento. "
+        "Intenta de nuevo en unos segundos.",
+      );
+    }
+    try {
+      return json.decode(trimmed);
+    } catch (_) {
+      throw Exception(
+        "Respuesta inesperada del servidor. Intenta de nuevo.",
+      );
+    }
+  }
+
+  /// ✅ Helper: extrae mensaje de error del body de forma segura.
+  String _extractErrorMessage(String body, String fallback) {
+    try {
+      final data = _safeJsonDecode(body);
+      if (data is Map) {
+        return data['message'] ?? data['error'] ?? fallback;
+      }
+      return fallback;
+    } catch (e) {
+      return e.toString().replaceFirst('Exception: ', '');
+    }
+  }
+
   Future<List<ReportModel>> getNeighborhoodReports() async {
     final token = await TokenStorage().getToken();
     if (token == null) throw Exception("No hay token, inicia sesión.");
@@ -21,21 +53,22 @@ class ReportService {
     );
 
     if (res.statusCode == 200) {
-      final List data = json.decode(res.body);
-      return data.map((e) => ReportModel.fromJson(e)).toList();
+      final data = _safeJsonDecode(res.body);
+      if (data is List) {
+        return data.map((e) => ReportModel.fromJson(e)).toList();
+      }
+      throw Exception("Formato de respuesta inesperado.");
     } else {
-      // ✅ Extraemos el mensaje limpio del backend
-      final errorData = json.decode(res.body);
-      throw Exception(errorData['message'] ?? "Error al cargar reportes.");
+      throw Exception(_extractErrorMessage(res.body, "Error al cargar reportes."));
     }
   }
 
-  /// ✅ ACTUALIZADO: Ahora envía la imagen como multipart/form-data
+  /// ✅ Envía la imagen como multipart/form-data
   /// al backend, que se encarga de subirla a Firebase Storage de forma segura.
   Future<void> createReport({
     required String title,
     required String description,
-    File? imageFile, // ✅ Cambiado de String? imageUrl a File? imageFile
+    File? imageFile,
   }) async {
     final token = await TokenStorage().getToken();
 
@@ -65,8 +98,7 @@ class ReportService {
     final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {
-      final errorData = json.decode(res.body);
-      throw Exception(errorData['message'] ?? "Error al crear reporte.");
+      throw Exception(_extractErrorMessage(res.body, "Error al crear reporte."));
     }
   }
 }
