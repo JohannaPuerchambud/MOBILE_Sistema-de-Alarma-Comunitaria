@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
@@ -279,6 +280,89 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   }
 
   // ✅ Ver imagen en pantalla completa
+  // ✅ Detecta si un mensaje contiene ubicación (formato nuevo o antiguo)
+  static final _locationTagRegex = RegExp(r'\[LOCATION:([\-\d.]+),([\-\d.]+)\]');
+  static final _legacyMapsRegex = RegExp(r'📍\s*Ubicación:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)');
+
+  /// Extrae la URL de Google Maps del mensaje, si existe.
+  /// Retorna null si no hay ubicación.
+  String? _extractMapsUrl(String message) {
+    // Formato nuevo: [LOCATION:lat,lng]
+    final tagMatch = _locationTagRegex.firstMatch(message);
+    if (tagMatch != null) {
+      final lat = tagMatch.group(1);
+      final lng = tagMatch.group(2);
+      return 'https://maps.google.com/?q=$lat,$lng';
+    }
+    // Formato antiguo: 📍 Ubicación: https://maps.google.com/?q=...
+    final legacyMatch = _legacyMapsRegex.firstMatch(message);
+    if (legacyMatch != null) {
+      return legacyMatch.group(1);
+    }
+    return null;
+  }
+
+  /// Limpia el mensaje removiendo el tag/link de ubicación para mostrar solo el texto.
+  String _cleanMessageText(String message) {
+    // Remover formato nuevo
+    String cleaned = message.replaceAll(_locationTagRegex, '').trim();
+    // Remover formato antiguo
+    cleaned = cleaned.replaceAll(_legacyMapsRegex, '').trim();
+    return cleaned;
+  }
+
+  /// Construye el botón de "Ver Ubicación" para mensajes de emergencia.
+  Widget _buildLocationButton(String mapsUrl, bool isMine) {
+    return GestureDetector(
+      onTap: () async {
+        final uri = Uri.parse(mapsUrl);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.only(top: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isMine
+                ? [Colors.white.withOpacity(0.25), Colors.white.withOpacity(0.10)]
+                : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+          ),
+          borderRadius: BorderRadius.circular(12),
+          border: isMine
+              ? Border.all(color: Colors.white.withOpacity(0.4), width: 1)
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.location_on,
+              size: 18,
+              color: isMine ? Colors.white : Colors.white,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '📍 Ver Ubicación',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: isMine ? Colors.white : Colors.white,
+              ),
+            ),
+            const SizedBox(width: 4),
+            Icon(
+              Icons.open_in_new,
+              size: 14,
+              color: isMine ? Colors.white70 : Colors.white70,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showFullImage(String imageUrl) {
     Navigator.push(
       context,
@@ -489,17 +573,36 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               ],
 
                               // ✅ Texto del mensaje (solo si no es solo foto)
-                              if (m.message.isNotEmpty && m.message != '📷 Foto')
-                                Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
-                                  child: Text(
-                                    m.message,
-                                    style: TextStyle(
-                                      fontSize: 15,
-                                      color: isMine ? Colors.white : const Color(0xFF333333),
-                                    ),
-                                  ),
-                                ),
+                              if (m.message.isNotEmpty && m.message != '📷 Foto') ...[
+                                Builder(builder: (_) {
+                                  final mapsUrl = _extractMapsUrl(m.message);
+                                  final displayText = mapsUrl != null
+                                      ? _cleanMessageText(m.message)
+                                      : m.message;
+
+                                  return Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      if (displayText.isNotEmpty)
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
+                                          child: Text(
+                                            displayText,
+                                            style: TextStyle(
+                                              fontSize: 15,
+                                              color: isMine ? Colors.white : const Color(0xFF333333),
+                                            ),
+                                          ),
+                                        ),
+                                      if (mapsUrl != null)
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
+                                          child: _buildLocationButton(mapsUrl, isMine),
+                                        ),
+                                    ],
+                                  );
+                                }),
+                              ],
 
                               // ✅ Etiqueta de hora alineada a la derecha
                               const SizedBox(height: 4),
