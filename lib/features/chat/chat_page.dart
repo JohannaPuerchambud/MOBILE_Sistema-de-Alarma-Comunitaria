@@ -283,18 +283,21 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   // ✅ Detecta si un mensaje contiene ubicación (formato nuevo o antiguo)
   static final _locationTagRegex = RegExp(r'\[LOCATION:([\-\d.]+),([\-\d.]+)\]');
   static final _legacyMapsRegex = RegExp(r'📍\s*Ubicación:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)');
+  static final _noEvidenceRegex = RegExp(r'\[NO_EVIDENCE\]');
+
+  /// Detecta si un mensaje es de emergencia
+  bool _isEmergencyMessage(String message) {
+    return message.contains('🚨') && message.contains('EMERGENCIA ACTIVADA');
+  }
 
   /// Extrae la URL de Google Maps del mensaje, si existe.
-  /// Retorna null si no hay ubicación.
   String? _extractMapsUrl(String message) {
-    // Formato nuevo: [LOCATION:lat,lng]
     final tagMatch = _locationTagRegex.firstMatch(message);
     if (tagMatch != null) {
       final lat = tagMatch.group(1);
       final lng = tagMatch.group(2);
       return 'https://maps.google.com/?q=$lat,$lng';
     }
-    // Formato antiguo: 📍 Ubicación: https://maps.google.com/?q=...
     final legacyMatch = _legacyMapsRegex.firstMatch(message);
     if (legacyMatch != null) {
       return legacyMatch.group(1);
@@ -302,12 +305,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return null;
   }
 
-  /// Limpia el mensaje removiendo el tag/link de ubicación para mostrar solo el texto.
+  /// Limpia el mensaje removiendo tags internos para mostrar solo el texto.
   String _cleanMessageText(String message) {
-    // Remover formato nuevo
     String cleaned = message.replaceAll(_locationTagRegex, '').trim();
-    // Remover formato antiguo
     cleaned = cleaned.replaceAll(_legacyMapsRegex, '').trim();
+    cleaned = cleaned.replaceAll(_noEvidenceRegex, '').trim();
     return cleaned;
   }
 
@@ -572,8 +574,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                 ),
                               ],
 
-                              // ✅ Imagen del mensaje (si existe)
-                              if (m.hasImage) ...[
+                              // ✅ Imagen del mensaje (si existe y NO es emergencia)
+                              // En emergencias, la imagen se muestra después del botón de ubicación
+                              if (m.hasImage && !_isEmergencyMessage(m.message)) ...[
                                 _buildChatImage(m.imageUrl!, isMine),
                                 const SizedBox(height: 6),
                               ],
@@ -585,6 +588,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   final displayText = mapsUrl != null
                                       ? _cleanMessageText(m.message)
                                       : m.message;
+                                  final isEmergency = _isEmergencyMessage(m.message);
 
                                   return Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -605,6 +609,59 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                           padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
                                           child: _buildLocationButton(mapsUrl, isMine),
                                         ),
+                                      // ✅ Evidencia de emergencia: imagen o "Sin evidencia"
+                                      if (isEmergency) ...[
+                                        const SizedBox(height: 8),
+                                        Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
+                                          child: Text(
+                                            '📸 Evidencia:',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.bold,
+                                              color: isMine ? Colors.white70 : Colors.grey[600],
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        if (m.hasImage)
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 6 : 0),
+                                            child: _buildChatImage(m.imageUrl!, isMine),
+                                          )
+                                        else
+                                          Padding(
+                                            padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                              decoration: BoxDecoration(
+                                                color: isMine
+                                                    ? Colors.white.withOpacity(0.15)
+                                                    : Colors.grey[100],
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Row(
+                                                mainAxisSize: MainAxisSize.min,
+                                                children: [
+                                                  Icon(
+                                                    Icons.image_not_supported_outlined,
+                                                    size: 16,
+                                                    color: isMine ? Colors.white54 : Colors.grey,
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                  Text(
+                                                    'Sin evidencia adjunta',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontStyle: FontStyle.italic,
+                                                      color: isMine ? Colors.white54 : Colors.grey,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                      ],
                                     ],
                                   );
                                 }),

@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../core/config/fcm_service.dart';
 import '../../features/reports/report_list_page.dart';
 import '../../features/reports/report_create_page.dart';
@@ -43,8 +45,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   // ✅ Flujo de confirmación de emergencia (Tarea 2.2)
   void _showEmergencyConfirmation() {
     final justificationCtrl = TextEditingController();
+    final picker = ImagePicker();
     bool loading = false;
     String? modalError;
+    File? evidenceImage;
 
     showModalBottomSheet(
       context: context,
@@ -118,6 +122,105 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       ),
                     ),
                   ),
+                  const SizedBox(height: 12),
+
+                  // ✅ Evidencia fotográfica (opcional)
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      "Evidencia fotográfica (Opcional)",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF555555),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: loading
+                        ? null
+                        : () {
+                            showModalBottomSheet(
+                              context: ctx,
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                              ),
+                              builder: (sheetCtx) => SafeArea(
+                                child: Wrap(
+                                  children: [
+                                    ListTile(
+                                      leading: const Icon(Icons.camera_alt_outlined, color: Colors.redAccent),
+                                      title: const Text('Tomar foto con la cámara'),
+                                      onTap: () async {
+                                        Navigator.pop(sheetCtx);
+                                        final picked = await picker.pickImage(
+                                          source: ImageSource.camera,
+                                          imageQuality: 60,
+                                          maxWidth: 800,
+                                          maxHeight: 800,
+                                        );
+                                        if (picked != null) {
+                                          setModalState(() => evidenceImage = File(picked.path));
+                                        }
+                                      },
+                                    ),
+                                    ListTile(
+                                      leading: const Icon(Icons.photo_library_outlined, color: Colors.redAccent),
+                                      title: const Text('Elegir de la galería'),
+                                      onTap: () async {
+                                        Navigator.pop(sheetCtx);
+                                        final picked = await picker.pickImage(
+                                          source: ImageSource.gallery,
+                                          imageQuality: 60,
+                                          maxWidth: 800,
+                                          maxHeight: 800,
+                                        );
+                                        if (picked != null) {
+                                          setModalState(() => evidenceImage = File(picked.path));
+                                        }
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                    child: Container(
+                      height: 120,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F9FA),
+                        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: evidenceImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(11),
+                              child: Image.file(evidenceImage!, fit: BoxFit.cover),
+                            )
+                          : const Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.add_a_photo_outlined, size: 32, color: Color(0xFF999999)),
+                                SizedBox(height: 6),
+                                Text(
+                                  "Toca para adjuntar evidencia",
+                                  style: TextStyle(color: Color(0xFF777777), fontSize: 12, fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                    ),
+                  ),
+                  if (evidenceImage != null)
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: loading ? null : () => setModalState(() => evidenceImage = null),
+                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
+                        label: const Text("Quitar foto", style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                      ),
+                    ),
                   const SizedBox(height: 8),
 
                   // ✅ Error de validación dentro del modal (no SnackBar)
@@ -162,10 +265,9 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               });
 
                               try {
-                                // Enviar emergencia al backend
-                                // El backend obtiene la ubicación del domicilio registrado
                                 await EmergencyService.triggerEmergency(
                                   justification: justification,
+                                  imageFile: evidenceImage,
                                 );
 
                                 if (!ctx.mounted) return;
