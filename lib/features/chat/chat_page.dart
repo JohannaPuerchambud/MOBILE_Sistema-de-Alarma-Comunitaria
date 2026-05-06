@@ -315,9 +315,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
   Widget _buildLocationButton(String mapsUrl, bool isMine) {
     return GestureDetector(
       onTap: () async {
-        final uri = Uri.parse(mapsUrl);
-        if (await canLaunchUrl(uri)) {
+        try {
+          final uri = Uri.parse(mapsUrl);
           await launchUrl(uri, mode: LaunchMode.externalApplication);
+        } catch (e) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('No se pudo abrir Google Maps')),
+            );
+          }
         }
       },
       child: Container(
