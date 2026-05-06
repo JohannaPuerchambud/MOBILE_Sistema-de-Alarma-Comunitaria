@@ -36,11 +36,20 @@ class EmergencyService {
     final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {
-      // Parseo seguro del error
+      // Detectar si el servidor devolvió HTML (Render dormido)
+      final body = res.body.trim();
+      if (body.startsWith('<!') || body.startsWith('<html')) {
+        throw Exception(
+          "El servidor no está disponible en este momento. "
+          "Intenta de nuevo en unos segundos.",
+        );
+      }
+      // Parsear error JSON del backend
       try {
-        final errorData = json.decode(res.body);
-        throw Exception(errorData['message'] ?? "Error al activar la emergencia.");
-      } catch (_) {
+        final errorData = json.decode(body);
+        final msg = errorData['message'] ?? errorData['error'] ?? "Error al activar la emergencia.";
+        throw Exception(msg);
+      } on FormatException {
         throw Exception("Error al activar la emergencia.");
       }
     }
