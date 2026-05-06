@@ -162,14 +162,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               });
 
                               try {
-                                // Obtener ubicación
-                                final position = await EmergencyService.getCurrentLocation();
-
                                 // Enviar emergencia al backend
+                                // El backend obtiene la ubicación del domicilio registrado
                                 await EmergencyService.triggerEmergency(
                                   justification: justification,
-                                  latitude: position.latitude,
-                                  longitude: position.longitude,
                                 );
 
                                 if (!ctx.mounted) return;
@@ -245,7 +241,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
             const SizedBox(height: 8),
             const Text(
-              "La sirena se ha activado y tus vecinos han sido alertados con tu ubicación.",
+              "La sirena se ha activado y tus vecinos han sido alertados con tu dirección registrada.",
               textAlign: TextAlign.center,
               style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
