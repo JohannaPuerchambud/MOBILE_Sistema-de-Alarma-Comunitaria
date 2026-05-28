@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart'; // 🟢 NUEVO IMPORT
 
 import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
@@ -27,8 +28,16 @@ class EmergencyService {
 
     // Adjuntar imagen si existe
     if (imageFile != null) {
+      // 🟢 CAMBIO CLAVE: Detectar extensión y declarar el Content-Type
+      String extension = imageFile.path.split('.').last.toLowerCase();
+      if (extension == 'jpg') extension = 'jpeg';
+
       request.files.add(
-        await http.MultipartFile.fromPath("image", imageFile.path),
+        await http.MultipartFile.fromPath(
+          "image",
+          imageFile.path,
+          contentType: MediaType('image', extension), // Le avisa a Node.js que es imagen
+        ),
       );
     }
 
@@ -41,7 +50,7 @@ class EmergencyService {
       if (body.startsWith('<!') || body.startsWith('<html')) {
         throw Exception(
           "El servidor no está disponible en este momento. "
-          "Intenta de nuevo en unos segundos.",
+              "Intenta de nuevo en unos segundos.",
         );
       }
       // Parsear error JSON del backend
