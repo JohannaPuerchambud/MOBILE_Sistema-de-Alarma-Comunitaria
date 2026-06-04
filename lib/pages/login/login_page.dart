@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/token_storage.dart';
 import '../home/home_page.dart';
@@ -32,6 +33,19 @@ class _LoginPageState extends State<LoginPage> {
       if (!mounted) return;
 
       if (token != null && token.isNotEmpty) {
+        final claims = JwtDecoder.decode(token);
+        final role = int.tryParse('${claims['role']}');
+
+        if (role != 3) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Esta aplicación es exclusiva para vecinos.'),
+              backgroundColor: Colors.redAccent,
+            ),
+          );
+          return;
+        }
+
         await _storage.saveToken(token);
 
         if (!mounted) return;

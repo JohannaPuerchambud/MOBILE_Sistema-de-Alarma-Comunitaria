@@ -49,8 +49,24 @@ class AuthGate extends StatelessWidget {
   Future<bool> _hasValidToken() async {
     final token = await TokenStorage().getToken();
     if (token == null || token.isEmpty) return false;
-    if (JwtDecoder.isExpired(token)) return false;
-    return true;
+    try {
+      if (JwtDecoder.isExpired(token)) {
+        await TokenStorage().clearToken();
+        return false;
+      }
+
+      final claims = JwtDecoder.decode(token);
+      final role = int.tryParse('${claims['role']}');
+      if (role != 3) {
+        await TokenStorage().clearToken();
+        return false;
+      }
+
+      return true;
+    } catch (_) {
+      await TokenStorage().clearToken();
+      return false;
+    }
   }
 
   @override

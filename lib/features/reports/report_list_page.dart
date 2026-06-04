@@ -4,7 +4,6 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'report_model.dart';
 import 'report_service.dart';
 import '../../core/auth/token_storage.dart';
-import '../../pages/login/login_page.dart';
 
 class ReportListPage extends StatefulWidget {
   const ReportListPage({super.key});
@@ -76,18 +75,6 @@ class _ReportListPageState extends State<ReportListPage> {
         "${dt.month.toString().padLeft(2, '0')}/"
         "${dt.year} ${dt.hour.toString().padLeft(2, '0')}:"
         "${dt.minute.toString().padLeft(2, '0')}";
-  }
-
-  // Mantenemos la función por si la necesitas a futuro,
-  // aunque el botón visual ya se movió al Perfil
-  Future<void> _logout() async {
-    await TokenStorage().clearToken();
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-          (route) => false,
-    );
   }
 
   @override

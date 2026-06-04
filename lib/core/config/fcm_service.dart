@@ -54,25 +54,25 @@ class PushNotificationService {
       final body = message.notification?.body ?? "";
 
       // Mostrar un SnackBar visible al usuario
-      if (navigatorKey?.currentContext != null) {
-        final context = navigatorKey!.currentContext!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                if (body.isNotEmpty) Text(body, style: const TextStyle(fontSize: 13)),
-              ],
-            ),
-            backgroundColor: const Color(0xFF667EEA),
-            behavior: SnackBarBehavior.floating,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            duration: const Duration(seconds: 5),
+      final context = navigatorKey?.currentContext;
+      if (context == null || !context.mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              if (body.isNotEmpty) Text(body, style: const TextStyle(fontSize: 13)),
+            ],
           ),
-        );
-      }
+          backgroundColor: const Color(0xFF667EEA),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          duration: const Duration(seconds: 5),
+        ),
+      );
     });
 
     // 6. Handler para cuando el usuario toca la notificación (app en background)
