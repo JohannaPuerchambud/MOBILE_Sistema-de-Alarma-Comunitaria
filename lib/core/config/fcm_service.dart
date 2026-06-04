@@ -33,7 +33,7 @@ class PushNotificationService {
 
     // 2. Obtener el "FCM Token" único de este celular
     String? token = await _firebaseMessaging.getToken();
-    print("📲 FCM Token del dispositivo: $token");
+    print("FCM Token obtenido correctamente.");
 
     // 3. Enviar este token a nuestra API en Node.js
     if (token != null) {

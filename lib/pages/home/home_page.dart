@@ -265,7 +265,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               });
 
                               try {
-                                await EmergencyService.triggerEmergency(
+                                final result = await EmergencyService.triggerEmergency(
                                   justification: justification,
                                   imageFile: evidenceImage,
                                 );
@@ -274,7 +274,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                 Navigator.pop(ctx);
 
                                 // Mostrar confirmación
-                                _showEmergencySuccess();
+                                _showEmergencySuccess(result);
                               } catch (e) {
                                 setModalState(() {
                                   loading = false;
@@ -319,7 +319,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
-  void _showEmergencySuccess() {
+  void _showEmergencySuccess(EmergencyResult result) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -338,14 +338,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             ),
             const SizedBox(height: 16),
             const Text(
-              "¡Alarma Activada!",
+              "Emergencia Registrada",
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "La sirena se ha activado y tus vecinos han sido alertados con tu dirección registrada.",
+            Text(
+              result.userMessage,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey, fontSize: 14),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ],
         ),
