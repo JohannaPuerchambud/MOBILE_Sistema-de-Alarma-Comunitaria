@@ -1,4 +1,11 @@
 class ApiConfig {
-  static const String baseUrl = 'https://api-sistema-de-alarma-comunitaria.onrender.com/api'; // REST API
-  static const String socketUrl = 'https://api-sistema-de-alarma-comunitaria.onrender.com';   // Socket.IO
+  static const String baseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'https://api-sistema-de-alarma-comunitaria.onrender.com/api',
+  );
+
+  static const String socketUrl = String.fromEnvironment(
+    'SOCKET_URL',
+    defaultValue: 'https://api-sistema-de-alarma-comunitaria.onrender.com',
+  );
 }
