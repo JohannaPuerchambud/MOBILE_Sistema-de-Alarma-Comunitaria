@@ -160,7 +160,7 @@ class EmergencyService {
       );
     }
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(ApiConfig.emergencyTimeout);
     final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {

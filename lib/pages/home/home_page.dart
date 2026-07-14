@@ -16,7 +16,8 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
 
@@ -71,7 +72,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 children: [
                   // Barra decorativa
                   Container(
-                    width: 40, height: 4,
+                    width: 40,
+                    height: 4,
                     decoration: BoxDecoration(
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(2),
@@ -83,16 +85,24 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: Colors.red.withValues(alpha: 0.1),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.warning_rounded, size: 48, color: Colors.redAccent),
+                    child: const Icon(
+                      Icons.warning_rounded,
+                      size: 48,
+                      color: Colors.redAccent,
+                    ),
                   ),
                   const SizedBox(height: 16),
 
                   const Text(
                     "⚠️ ¿Estás seguro?",
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Color(0xFF333333)),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF333333),
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -114,11 +124,17 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       fillColor: const Color(0xFFF8F9FA),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                        borderSide: const BorderSide(
+                          color: Color(0xFFE0E0E0),
+                          width: 1.5,
+                        ),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.redAccent, width: 2),
+                        borderSide: const BorderSide(
+                          color: Colors.redAccent,
+                          width: 2,
+                        ),
                       ),
                     ),
                   ),
@@ -144,14 +160,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                             showModalBottomSheet(
                               context: ctx,
                               shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(20),
+                                ),
                               ),
                               builder: (sheetCtx) => SafeArea(
                                 child: Wrap(
                                   children: [
                                     ListTile(
-                                      leading: const Icon(Icons.camera_alt_outlined, color: Colors.redAccent),
-                                      title: const Text('Tomar foto con la cámara'),
+                                      leading: const Icon(
+                                        Icons.camera_alt_outlined,
+                                        color: Colors.redAccent,
+                                      ),
+                                      title: const Text(
+                                        'Tomar foto con la cámara',
+                                      ),
                                       onTap: () async {
                                         Navigator.pop(sheetCtx);
                                         final picked = await picker.pickImage(
@@ -161,12 +184,19 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                           maxHeight: 800,
                                         );
                                         if (picked != null) {
-                                          setModalState(() => evidenceImage = File(picked.path));
+                                          setModalState(
+                                            () => evidenceImage = File(
+                                              picked.path,
+                                            ),
+                                          );
                                         }
                                       },
                                     ),
                                     ListTile(
-                                      leading: const Icon(Icons.photo_library_outlined, color: Colors.redAccent),
+                                      leading: const Icon(
+                                        Icons.photo_library_outlined,
+                                        color: Colors.redAccent,
+                                      ),
                                       title: const Text('Elegir de la galería'),
                                       onTap: () async {
                                         Navigator.pop(sheetCtx);
@@ -177,7 +207,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                                           maxHeight: 800,
                                         );
                                         if (picked != null) {
-                                          setModalState(() => evidenceImage = File(picked.path));
+                                          setModalState(
+                                            () => evidenceImage = File(
+                                              picked.path,
+                                            ),
+                                          );
                                         }
                                       },
                                     ),
@@ -191,22 +225,36 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: const Color(0xFFF8F9FA),
-                        border: Border.all(color: const Color(0xFFE0E0E0), width: 1.5),
+                        border: Border.all(
+                          color: const Color(0xFFE0E0E0),
+                          width: 1.5,
+                        ),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: evidenceImage != null
                           ? ClipRRect(
                               borderRadius: BorderRadius.circular(11),
-                              child: Image.file(evidenceImage!, fit: BoxFit.cover),
+                              child: Image.file(
+                                evidenceImage!,
+                                fit: BoxFit.cover,
+                              ),
                             )
                           : const Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(Icons.add_a_photo_outlined, size: 32, color: Color(0xFF999999)),
+                                Icon(
+                                  Icons.add_a_photo_outlined,
+                                  size: 32,
+                                  color: Color(0xFF999999),
+                                ),
                                 SizedBox(height: 6),
                                 Text(
                                   "Toca para adjuntar evidencia",
-                                  style: TextStyle(color: Color(0xFF777777), fontSize: 12, fontWeight: FontWeight.w500),
+                                  style: TextStyle(
+                                    color: Color(0xFF777777),
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ],
                             ),
@@ -216,9 +264,21 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton.icon(
-                        onPressed: loading ? null : () => setModalState(() => evidenceImage = null),
-                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent, size: 18),
-                        label: const Text("Quitar foto", style: TextStyle(color: Colors.redAccent, fontSize: 12)),
+                        onPressed: loading
+                            ? null
+                            : () => setModalState(() => evidenceImage = null),
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.redAccent,
+                          size: 18,
+                        ),
+                        label: const Text(
+                          "Quitar foto",
+                          style: TextStyle(
+                            color: Colors.redAccent,
+                            fontSize: 12,
+                          ),
+                        ),
                       ),
                     ),
                   const SizedBox(height: 8),
@@ -229,12 +289,20 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       padding: const EdgeInsets.only(bottom: 12),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline, color: Colors.redAccent, size: 18),
+                          const Icon(
+                            Icons.error_outline,
+                            color: Colors.redAccent,
+                            size: 18,
+                          ),
                           const SizedBox(width: 6),
                           Expanded(
                             child: Text(
                               modalError!,
-                              style: const TextStyle(color: Colors.redAccent, fontSize: 13, fontWeight: FontWeight.w600),
+                              style: const TextStyle(
+                                color: Colors.redAccent,
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                              ),
                             ),
                           ),
                         ],
@@ -251,10 +319,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       onPressed: loading
                           ? null
                           : () async {
-                              final justification = justificationCtrl.text.trim();
+                              final justification = justificationCtrl.text
+                                  .trim();
                               if (justification.isEmpty) {
                                 setModalState(() {
-                                  modalError = "Escribe el motivo de la emergencia";
+                                  modalError =
+                                      "Escribe el motivo de la emergencia";
                                 });
                                 return;
                               }
@@ -265,10 +335,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               });
 
                               try {
-                                final result = await EmergencyService.triggerEmergency(
-                                  justification: justification,
-                                  imageFile: evidenceImage,
-                                );
+                                final result =
+                                    await EmergencyService.triggerEmergency(
+                                      justification: justification,
+                                      imageFile: evidenceImage,
+                                    );
 
                                 if (!ctx.mounted) return;
                                 Navigator.pop(ctx);
@@ -278,7 +349,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                               } catch (e) {
                                 setModalState(() {
                                   loading = false;
-                                  modalError = e.toString().replaceFirst("Exception: ", "");
+                                  modalError = e.toString().replaceFirst(
+                                    "Exception: ",
+                                    "",
+                                  );
                                 });
                               }
                             },
@@ -286,17 +360,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                         backgroundColor: Colors.redAccent,
                         foregroundColor: Colors.white,
                         elevation: 4,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
                       ),
                       icon: loading
                           ? const SizedBox(
-                              width: 20, height: 20,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.5,
+                              ),
                             )
                           : const Icon(Icons.campaign_rounded, size: 24),
                       label: Text(
                         loading ? "Activando..." : "ACTIVAR ALARMA",
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ),
@@ -307,7 +390,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     onPressed: loading ? null : () => Navigator.pop(ctx),
                     child: const Text(
                       "Cancelar",
-                      style: TextStyle(fontSize: 15, color: Colors.grey, fontWeight: FontWeight.w600),
+                      style: TextStyle(
+                        fontSize: 15,
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
@@ -331,10 +418,14 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.check_circle, size: 60, color: Colors.green),
+              child: const Icon(
+                Icons.check_circle,
+                size: 60,
+                color: Colors.green,
+              ),
             ),
             const SizedBox(height: 16),
             const Text(
@@ -352,7 +443,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text("Aceptar", style: TextStyle(color: Color(0xFF667EEA), fontWeight: FontWeight.bold)),
+            child: const Text(
+              "Aceptar",
+              style: TextStyle(
+                color: Color(0xFF667EEA),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
@@ -377,7 +474,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: const Color(0xFF667EEA).withOpacity(0.1),
+                color: const Color(0xFF667EEA).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 36, color: const Color(0xFF667EEA)),
@@ -405,7 +502,10 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Inicio', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Inicio',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -458,7 +558,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.redAccent.withOpacity(0.4),
+                          color: Colors.redAccent.withValues(alpha: 0.4),
                           blurRadius: 24,
                           spreadRadius: 4,
                           offset: const Offset(0, 6),
@@ -468,7 +568,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     child: const Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.campaign_rounded, size: 50, color: Colors.white),
+                        Icon(
+                          Icons.campaign_rounded,
+                          size: 50,
+                          color: Colors.white,
+                        ),
                         SizedBox(height: 4),
                         Text(
                           "SOS",
@@ -494,7 +598,11 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                 alignment: Alignment.centerLeft,
                 child: Text(
                   "Aplicaciones",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF555555)),
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF555555),
+                  ),
                 ),
               ),
               const SizedBox(height: 14),
@@ -509,22 +617,38 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     _buildDashboardCard(
                       title: "Mi Perfil",
                       icon: Icons.person_outline,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ProfilePage()),
+                      ),
                     ),
                     _buildDashboardCard(
                       title: "Reportar\nSospechoso",
                       icon: Icons.visibility_outlined,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportCreatePage())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ReportCreatePage(),
+                        ),
+                      ),
                     ),
                     _buildDashboardCard(
                       title: "Ver Reportes",
                       icon: Icons.list_alt_rounded,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ReportListPage())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const ReportListPage(),
+                        ),
+                      ),
                     ),
                     _buildDashboardCard(
                       title: "Chat Barrial",
                       icon: Icons.forum_outlined,
-                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ChatPage())),
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const ChatPage()),
+                      ),
                     ),
                   ],
                 ),

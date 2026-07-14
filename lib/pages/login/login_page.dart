@@ -52,7 +52,7 @@ class _LoginPageState extends State<LoginPage> {
 
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (_) => const HomePage()),
-              (route) => false,
+          (route) => false,
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -95,17 +95,32 @@ class _LoginPageState extends State<LoginPage> {
             SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.only(left: 30, right: 30, top: 40, bottom: 20),
+                padding: const EdgeInsets.only(
+                  left: 30,
+                  right: 30,
+                  top: 40,
+                  bottom: 20,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: const [
                     Text(
                       "Sistema de Alarma",
-                      style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, height: 1.1),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
                     ),
                     Text(
                       "Comunitaria",
-                      style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, height: 1.1),
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        height: 1.1,
+                      ),
                     ),
                     SizedBox(height: 12),
                     Text(
@@ -129,7 +144,10 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
                 child: SingleChildScrollView(
-                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 30,
+                    vertical: 40,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -148,20 +166,33 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Input de Correo
                       const Text(
-                          "Correo Electrónico",
-                          style: TextStyle(color: Color(0xFF764BA2), fontWeight: FontWeight.bold, fontSize: 15)
+                        "Correo Electrónico",
+                        style: TextStyle(
+                          color: Color(0xFF764BA2),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                       TextField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: "ejemplo@correo.com",
-                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                          hintStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                           enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                            borderSide: BorderSide(
+                              color: Color(0xFFE0E0E0),
+                              width: 1.5,
+                            ),
                           ),
                           focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF667EEA), width: 2.5),
+                            borderSide: BorderSide(
+                              color: Color(0xFF667EEA),
+                              width: 2.5,
+                            ),
                           ),
                         ),
                       ),
@@ -169,24 +200,39 @@ class _LoginPageState extends State<LoginPage> {
 
                       // Input de Contraseña
                       const Text(
-                          "Contraseña",
-                          style: TextStyle(color: Color(0xFF764BA2), fontWeight: FontWeight.bold, fontSize: 15)
+                        "Contraseña",
+                        style: TextStyle(
+                          color: Color(0xFF764BA2),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 15,
+                        ),
                       ),
                       TextField(
                         controller: _passwordController,
                         obscureText: _obscureText,
                         decoration: InputDecoration(
                           hintText: "••••••••",
-                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                          hintStyle: const TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
                           enabledBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFFE0E0E0), width: 1.5),
+                            borderSide: BorderSide(
+                              color: Color(0xFFE0E0E0),
+                              width: 1.5,
+                            ),
                           ),
                           focusedBorder: const UnderlineInputBorder(
-                            borderSide: BorderSide(color: Color(0xFF667EEA), width: 2.5),
+                            borderSide: BorderSide(
+                              color: Color(0xFF667EEA),
+                              width: 2.5,
+                            ),
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _obscureText ? Icons.visibility_off : Icons.visibility,
+                              _obscureText
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: Colors.grey,
                             ),
                             onPressed: () {
@@ -211,7 +257,9 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color(0xFF667EEA).withOpacity(0.4),
+                                color: const Color(
+                                  0xFF667EEA,
+                                ).withValues(alpha: 0.4),
                                 blurRadius: 15,
                                 offset: const Offset(0, 5),
                               ),
@@ -222,18 +270,28 @@ class _LoginPageState extends State<LoginPage> {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
                             ),
                             child: loading
                                 ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
-                            )
+                                    height: 24,
+                                    width: 24,
+                                    child: CircularProgressIndicator(
+                                      color: Colors.white,
+                                      strokeWidth: 2.5,
+                                    ),
+                                  )
                                 : const Text(
-                              "INGRESAR",
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white, letterSpacing: 1.2),
-                            ),
+                                    "INGRESAR",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                      letterSpacing: 1.2,
+                                    ),
+                                  ),
                           ),
                         ),
                       ),

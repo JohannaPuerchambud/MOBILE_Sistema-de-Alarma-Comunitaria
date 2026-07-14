@@ -50,7 +50,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   @override
   void didChangeMetrics() {
-    final bottomInset = WidgetsBinding.instance.platformDispatcher.views.first.viewInsets.bottom;
+    final bottomInset = WidgetsBinding
+        .instance
+        .platformDispatcher
+        .views
+        .first
+        .viewInsets
+        .bottom;
 
     if (bottomInset != _lastKeyboardInset) {
       _lastKeyboardInset = bottomInset;
@@ -90,7 +96,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
 
     final claims = JwtDecoder.decode(token);
-    myUserId = claims['id'] is int ? claims['id'] : int.tryParse('${claims['id']}');
+    myUserId = claims['id'] is int
+        ? claims['id']
+        : int.tryParse('${claims['id']}');
     neighborhoodName = '${claims['neighborhood_name'] ?? ""}';
 
     if (mounted) {
@@ -145,16 +153,28 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF667EEA)),
-              title: const Text('Tomar foto con la cámara', style: TextStyle(fontWeight: FontWeight.w500)),
+              leading: const Icon(
+                Icons.camera_alt_outlined,
+                color: Color(0xFF667EEA),
+              ),
+              title: const Text(
+                'Tomar foto con la cámara',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndSendImage(ImageSource.camera);
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: Color(0xFF667EEA)),
-              title: const Text('Elegir de la galería', style: TextStyle(fontWeight: FontWeight.w500)),
+              leading: const Icon(
+                Icons.photo_library_outlined,
+                color: Color(0xFF667EEA),
+              ),
+              title: const Text(
+                'Elegir de la galería',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndSendImage(ImageSource.gallery);
@@ -189,7 +209,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         await http.MultipartFile.fromPath("image", pickedFile.path),
       );
 
-      final streamedRes = await request.send();
+      final streamedRes = await request.send().timeout(
+        ApiConfig.requestTimeout,
+      );
       final res = await http.Response.fromStream(streamedRes);
 
       if (res.statusCode == 200) {
@@ -213,9 +235,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   void _snack(String s) {
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(s)),
-    );
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
   }
 
   // ✅ Función auxiliar para formatear la fecha
@@ -235,8 +255,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             borderRadius: BorderRadius.circular(12),
           ),
           child: Text(
-            DateFormat('d \'de\' MMMM, y', 'es').format(dateTime), // Ej: 16 de marzo, 2026
-            style: const TextStyle(fontSize: 12, color: Colors.black54, fontWeight: FontWeight.bold),
+            DateFormat(
+              'd \'de\' MMMM, y',
+              'es',
+            ).format(dateTime), // Ej: 16 de marzo, 2026
+            style: const TextStyle(
+              fontSize: 12,
+              color: Colors.black54,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -261,7 +288,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               height: 220,
               color: isMine ? Colors.white24 : Colors.grey[200],
               child: const Center(
-                child: CircularProgressIndicator(color: Color(0xFF667EEA), strokeWidth: 2),
+                child: CircularProgressIndicator(
+                  color: Color(0xFF667EEA),
+                  strokeWidth: 2,
+                ),
               ),
             );
           },
@@ -280,8 +310,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   // ✅ Ver imagen en pantalla completa
   // ✅ Detecta si un mensaje contiene ubicación (formato nuevo o antiguo)
-  static final _locationTagRegex = RegExp(r'\[LOCATION:([\-\d.]+),([\-\d.]+)\]');
-  static final _legacyMapsRegex = RegExp(r'📍\s*Ubicación:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)');
+  static final _locationTagRegex = RegExp(
+    r'\[LOCATION:([\-\d.]+),([\-\d.]+)\]',
+  );
+  static final _legacyMapsRegex = RegExp(
+    r'📍\s*Ubicación:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)',
+  );
   static final _noEvidenceRegex = RegExp(r'\[NO_EVIDENCE\]');
 
   /// Detecta si un mensaje es de emergencia
@@ -333,12 +367,15 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: isMine
-                ? [Colors.white.withOpacity(0.25), Colors.white.withOpacity(0.10)]
+                ? [
+                    Colors.white.withValues(alpha: 0.25),
+                    Colors.white.withValues(alpha: 0.10),
+                  ]
                 : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
           ),
           borderRadius: BorderRadius.circular(12),
           border: isMine
-              ? Border.all(color: Colors.white.withOpacity(0.4), width: 1)
+              ? Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1)
               : null,
         ),
         child: Row(
@@ -451,15 +488,22 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           if (_uploadingImage)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: const Color(0xFF667EEA).withOpacity(0.1),
+              color: const Color(0xFF667EEA).withValues(alpha: 0.1),
               child: const Row(
                 children: [
                   SizedBox(
-                    width: 16, height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Color(0xFF667EEA)),
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Color(0xFF667EEA),
+                    ),
                   ),
                   SizedBox(width: 12),
-                  Text('Subiendo imagen...', style: TextStyle(color: Color(0xFF667EEA), fontSize: 13)),
+                  Text(
+                    'Subiendo imagen...',
+                    style: TextStyle(color: Color(0xFF667EEA), fontSize: 13),
+                  ),
                 ],
               ),
             ),
@@ -467,229 +511,321 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           Expanded(
             child: messages.isEmpty
                 ? const Center(
-              child: Text(
-                'Aún no hay mensajes',
-                style: TextStyle(
-                  fontSize: 15,
-                  color: Colors.black54,
-                ),
-              ),
-            )
+                    child: Text(
+                      'Aún no hay mensajes',
+                      style: TextStyle(fontSize: 15, color: Colors.black54),
+                    ),
+                  )
                 : AnimatedPadding(
-              duration: const Duration(milliseconds: 180),
-              curve: Curves.easeOut,
-              padding: EdgeInsets.only(bottom: keyboardBottom > 0 ? 8 : 0),
-              child: ListView.builder(
-                controller: _scrollController,
-                reverse: true, // Scroll invertido
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                itemCount: messages.length,
-                itemBuilder: (_, i) {
-                  // Mapeamos el índice invertido al índice real de la lista original
-                  final originalIndex = messages.length - 1 - i;
-                  final m = messages[originalIndex];
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    padding: EdgeInsets.only(
+                      bottom: keyboardBottom > 0 ? 8 : 0,
+                    ),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      reverse: true, // Scroll invertido
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                      itemCount: messages.length,
+                      itemBuilder: (_, i) {
+                        // Mapeamos el índice invertido al índice real de la lista original
+                        final originalIndex = messages.length - 1 - i;
+                        final m = messages[originalIndex];
 
-                  final isMine = (myUserId != null && m.userId == myUserId);
-                  final name = m.fullName.isEmpty ? 'Usuario' : m.fullName;
+                        final isMine =
+                            (myUserId != null && m.userId == myUserId);
+                        final name = m.fullName.isEmpty
+                            ? 'Usuario'
+                            : m.fullName;
 
-                  // ✅ Lógica de agrupación:
-                  // 1. Verificamos si el mensaje anterior (visualmente el de arriba) es del mismo usuario
-                  bool isSameUserAsPrevious = false;
-                  if (originalIndex > 0) {
-                    final previousMessage = messages[originalIndex - 1];
-                    isSameUserAsPrevious = previousMessage.userId == m.userId;
-                  }
+                        // ✅ Lógica de agrupación:
+                        // 1. Verificamos si el mensaje anterior (visualmente el de arriba) es del mismo usuario
+                        bool isSameUserAsPrevious = false;
+                        if (originalIndex > 0) {
+                          final previousMessage = messages[originalIndex - 1];
+                          isSameUserAsPrevious =
+                              previousMessage.userId == m.userId;
+                        }
 
-                  // 2. Verificamos si hubo un cambio de día respecto al mensaje anterior
-                  bool isDifferentDay = false;
-                  if (originalIndex > 0) {
-                    final previousMessage = messages[originalIndex - 1];
-                    isDifferentDay = previousMessage.createdAt.day != m.createdAt.day ||
-                        previousMessage.createdAt.month != m.createdAt.month ||
-                        previousMessage.createdAt.year != m.createdAt.year;
-                  }
+                        // 2. Verificamos si hubo un cambio de día respecto al mensaje anterior
+                        bool isDifferentDay = false;
+                        if (originalIndex > 0) {
+                          final previousMessage = messages[originalIndex - 1];
+                          isDifferentDay =
+                              previousMessage.createdAt.day !=
+                                  m.createdAt.day ||
+                              previousMessage.createdAt.month !=
+                                  m.createdAt.month ||
+                              previousMessage.createdAt.year !=
+                                  m.createdAt.year;
+                        }
 
-                  // Si cambió el día, forzamos a que no se agrupe para mostrar el separador
-                  if (isDifferentDay) {
-                    isSameUserAsPrevious = false;
-                  }
+                        // Si cambió el día, forzamos a que no se agrupe para mostrar el separador
+                        if (isDifferentDay) {
+                          isSameUserAsPrevious = false;
+                        }
 
-                  // ✅ Renderizado del mensaje
-                  return Column(
-                    crossAxisAlignment: isMine ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-                    children: [
-                      // Mostrar el divisor de fecha si es el primer mensaje o si cambió el día
-                      if (originalIndex == 0 || isDifferentDay)
-                        _buildDateDivider(m.createdAt),
+                        // ✅ Renderizado del mensaje
+                        return Column(
+                          crossAxisAlignment: isMine
+                              ? CrossAxisAlignment.end
+                              : CrossAxisAlignment.start,
+                          children: [
+                            // Mostrar el divisor de fecha si es el primer mensaje o si cambió el día
+                            if (originalIndex == 0 || isDifferentDay)
+                              _buildDateDivider(m.createdAt),
 
-                      Align(
-                        alignment: isMine ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          // ✅ Margen superior reducido si es un mensaje agrupado
-                          margin: EdgeInsets.only(
-                              top: isSameUserAsPrevious ? 2 : 12,
-                              bottom: 2
-                          ),
-                          padding: EdgeInsets.only(
-                            left: m.hasImage ? 4 : 14,
-                            right: m.hasImage ? 4 : 14,
-                            top: m.hasImage ? 4 : 10,
-                            bottom: 10,
-                          ),
-                          constraints: BoxConstraints(
-                            maxWidth: MediaQuery.of(context).size.width * 0.75,
-                          ),
-                          decoration: BoxDecoration(
-                            color: isMine ? const Color(0xFF667EEA) : Colors.white,
-                            // ✅ Ajustamos los bordes si está agrupado
-                            borderRadius: BorderRadius.only(
-                              topLeft: const Radius.circular(16),
-                              topRight: const Radius.circular(16),
-                              bottomLeft: Radius.circular(isMine || isSameUserAsPrevious ? 16 : 4),
-                              bottomRight: Radius.circular(!isMine || isSameUserAsPrevious ? 16 : 4),
-                            ),
-                            boxShadow: const [
-                              BoxShadow(color: Colors.black12, blurRadius: 2, offset: Offset(0, 1))
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              // ✅ Solo mostrar el nombre si NO está agrupado
-                              if (!isSameUserAsPrevious) ...[
-                                Padding(
-                                  padding: EdgeInsets.only(
-                                    left: m.hasImage ? 10 : 0,
-                                    bottom: 4,
-                                  ),
-                                  child: Text(
-                                    isMine ? 'Tú' : name,
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: isMine ? Colors.white70 : const Color(0xFF764BA2),
+                            Align(
+                              alignment: isMine
+                                  ? Alignment.centerRight
+                                  : Alignment.centerLeft,
+                              child: Container(
+                                // ✅ Margen superior reducido si es un mensaje agrupado
+                                margin: EdgeInsets.only(
+                                  top: isSameUserAsPrevious ? 2 : 12,
+                                  bottom: 2,
+                                ),
+                                padding: EdgeInsets.only(
+                                  left: m.hasImage ? 4 : 14,
+                                  right: m.hasImage ? 4 : 14,
+                                  top: m.hasImage ? 4 : 10,
+                                  bottom: 10,
+                                ),
+                                constraints: BoxConstraints(
+                                  maxWidth:
+                                      MediaQuery.of(context).size.width * 0.75,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isMine
+                                      ? const Color(0xFF667EEA)
+                                      : Colors.white,
+                                  // ✅ Ajustamos los bordes si está agrupado
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: const Radius.circular(16),
+                                    topRight: const Radius.circular(16),
+                                    bottomLeft: Radius.circular(
+                                      isMine || isSameUserAsPrevious ? 16 : 4,
+                                    ),
+                                    bottomRight: Radius.circular(
+                                      !isMine || isSameUserAsPrevious ? 16 : 4,
                                     ),
                                   ),
+                                  boxShadow: const [
+                                    BoxShadow(
+                                      color: Colors.black12,
+                                      blurRadius: 2,
+                                      offset: Offset(0, 1),
+                                    ),
+                                  ],
                                 ),
-                              ],
-
-                              // ✅ Imagen del mensaje (si existe y NO es emergencia)
-                              // En emergencias, la imagen se muestra después del botón de ubicación
-                              if (m.hasImage && !_isEmergencyMessage(m.message)) ...[
-                                _buildChatImage(m.imageUrl!, isMine),
-                                const SizedBox(height: 6),
-                              ],
-
-                              // ✅ Texto del mensaje (solo si no es solo foto)
-                              if (m.message.isNotEmpty && m.message != '📷 Foto') ...[
-                                Builder(builder: (_) {
-                                  final mapsUrl = _extractMapsUrl(m.message);
-                                  final displayText = mapsUrl != null
-                                      ? _cleanMessageText(m.message)
-                                      : m.message;
-                                  final isEmergency = _isEmergencyMessage(m.message);
-
-                                  return Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      if (displayText.isNotEmpty)
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
-                                          child: Text(
-                                            displayText,
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: isMine ? Colors.white : const Color(0xFF333333),
-                                            ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // ✅ Solo mostrar el nombre si NO está agrupado
+                                    if (!isSameUserAsPrevious) ...[
+                                      Padding(
+                                        padding: EdgeInsets.only(
+                                          left: m.hasImage ? 10 : 0,
+                                          bottom: 4,
+                                        ),
+                                        child: Text(
+                                          isMine ? 'Tú' : name,
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.bold,
+                                            color: isMine
+                                                ? Colors.white70
+                                                : const Color(0xFF764BA2),
                                           ),
                                         ),
-                                      if (mapsUrl != null)
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
-                                          child: _buildLocationButton(mapsUrl, isMine),
-                                        ),
-                                      // ✅ Evidencia de emergencia: imagen o "Sin evidencia"
-                                      if (isEmergency) ...[
-                                        const SizedBox(height: 8),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
-                                          child: Text(
-                                            '📸 Evidencia:',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              fontWeight: FontWeight.bold,
-                                              color: isMine ? Colors.white70 : Colors.grey[600],
-                                            ),
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        if (m.hasImage)
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 6 : 0),
-                                            child: _buildChatImage(m.imageUrl!, isMine),
-                                          )
-                                        else
-                                          Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: m.hasImage ? 10 : 0),
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                              decoration: BoxDecoration(
-                                                color: isMine
-                                                    ? Colors.white.withOpacity(0.15)
-                                                    : Colors.grey[100],
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: [
-                                                  Icon(
-                                                    Icons.image_not_supported_outlined,
-                                                    size: 16,
-                                                    color: isMine ? Colors.white54 : Colors.grey,
+                                      ),
+                                    ],
+
+                                    // ✅ Imagen del mensaje (si existe y NO es emergencia)
+                                    // En emergencias, la imagen se muestra después del botón de ubicación
+                                    if (m.hasImage &&
+                                        !_isEmergencyMessage(m.message)) ...[
+                                      _buildChatImage(m.imageUrl!, isMine),
+                                      const SizedBox(height: 6),
+                                    ],
+
+                                    // ✅ Texto del mensaje (solo si no es solo foto)
+                                    if (m.message.isNotEmpty &&
+                                        m.message != '📷 Foto') ...[
+                                      Builder(
+                                        builder: (_) {
+                                          final mapsUrl = _extractMapsUrl(
+                                            m.message,
+                                          );
+                                          final displayText = mapsUrl != null
+                                              ? _cleanMessageText(m.message)
+                                              : m.message;
+                                          final isEmergency =
+                                              _isEmergencyMessage(m.message);
+
+                                          return Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              if (displayText.isNotEmpty)
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: m.hasImage
+                                                        ? 10
+                                                        : 0,
                                                   ),
-                                                  const SizedBox(width: 6),
-                                                  Text(
-                                                    'Sin evidencia adjunta',
+                                                  child: Text(
+                                                    displayText,
                                                     style: TextStyle(
-                                                      fontSize: 12,
-                                                      fontStyle: FontStyle.italic,
-                                                      color: isMine ? Colors.white54 : Colors.grey,
+                                                      fontSize: 15,
+                                                      color: isMine
+                                                          ? Colors.white
+                                                          : const Color(
+                                                              0xFF333333,
+                                                            ),
                                                     ),
                                                   ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                      ],
+                                                ),
+                                              if (mapsUrl != null)
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: m.hasImage
+                                                        ? 10
+                                                        : 0,
+                                                  ),
+                                                  child: _buildLocationButton(
+                                                    mapsUrl,
+                                                    isMine,
+                                                  ),
+                                                ),
+                                              // ✅ Evidencia de emergencia: imagen o "Sin evidencia"
+                                              if (isEmergency) ...[
+                                                const SizedBox(height: 8),
+                                                Padding(
+                                                  padding: EdgeInsets.symmetric(
+                                                    horizontal: m.hasImage
+                                                        ? 10
+                                                        : 0,
+                                                  ),
+                                                  child: Text(
+                                                    '📸 Evidencia:',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: isMine
+                                                          ? Colors.white70
+                                                          : Colors.grey[600],
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(height: 4),
+                                                if (m.hasImage)
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: m.hasImage
+                                                              ? 6
+                                                              : 0,
+                                                        ),
+                                                    child: _buildChatImage(
+                                                      m.imageUrl!,
+                                                      isMine,
+                                                    ),
+                                                  )
+                                                else
+                                                  Padding(
+                                                    padding:
+                                                        EdgeInsets.symmetric(
+                                                          horizontal: m.hasImage
+                                                              ? 10
+                                                              : 0,
+                                                        ),
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 12,
+                                                            vertical: 8,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: isMine
+                                                            ? Colors.white
+                                                                  .withValues(
+                                                                    alpha: 0.15,
+                                                                  )
+                                                            : Colors.grey[100],
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              8,
+                                                            ),
+                                                      ),
+                                                      child: Row(
+                                                        mainAxisSize:
+                                                            MainAxisSize.min,
+                                                        children: [
+                                                          Icon(
+                                                            Icons
+                                                                .image_not_supported_outlined,
+                                                            size: 16,
+                                                            color: isMine
+                                                                ? Colors.white54
+                                                                : Colors.grey,
+                                                          ),
+                                                          const SizedBox(
+                                                            width: 6,
+                                                          ),
+                                                          Text(
+                                                            'Sin evidencia adjunta',
+                                                            style: TextStyle(
+                                                              fontSize: 12,
+                                                              fontStyle:
+                                                                  FontStyle
+                                                                      .italic,
+                                                              color: isMine
+                                                                  ? Colors
+                                                                        .white54
+                                                                  : Colors.grey,
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                              ],
+                                            ],
+                                          );
+                                        },
+                                      ),
                                     ],
-                                  );
-                                }),
-                              ],
 
-                              // ✅ Etiqueta de hora alineada a la derecha
-                              const SizedBox(height: 4),
-                              Padding(
-                                padding: EdgeInsets.only(right: m.hasImage ? 10 : 0),
-                                child: Align(
-                                  alignment: Alignment.bottomRight,
-                                  child: Text(
-                                    _formatTime(m.createdAt),
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      color: isMine ? Colors.white70 : Colors.black54,
+                                    // ✅ Etiqueta de hora alineada a la derecha
+                                    const SizedBox(height: 4),
+                                    Padding(
+                                      padding: EdgeInsets.only(
+                                        right: m.hasImage ? 10 : 0,
+                                      ),
+                                      child: Align(
+                                        alignment: Alignment.bottomRight,
+                                        child: Text(
+                                          _formatTime(m.createdAt),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: isMine
+                                                ? Colors.white70
+                                                : Colors.black54,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
+                                  ],
                                 ),
                               ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  );
-                },
-              ),
-            ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
           ),
 
           // ✅ Barra de entrada con botón de foto
@@ -702,7 +838,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   color: Colors.black12,
                   blurRadius: 10,
                   offset: Offset(0, -2),
-                )
+                ),
               ],
             ),
             child: SafeArea(
@@ -711,10 +847,14 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 children: [
                   // ✅ Botón de adjuntar foto
                   IconButton(
-                    onPressed: _uploadingImage ? null : _showImageSourceActionSheet,
+                    onPressed: _uploadingImage
+                        ? null
+                        : _showImageSourceActionSheet,
                     icon: Icon(
                       Icons.attach_file_rounded,
-                      color: _uploadingImage ? Colors.grey : const Color(0xFF667EEA),
+                      color: _uploadingImage
+                          ? Colors.grey
+                          : const Color(0xFF667EEA),
                     ),
                   ),
                   Expanded(
@@ -751,10 +891,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     ),
                     child: IconButton(
                       onPressed: _send,
-                      icon: const Icon(
-                        Icons.send_rounded,
-                        color: Colors.white,
-                      ),
+                      icon: const Icon(Icons.send_rounded, color: Colors.white),
                     ),
                   ),
                 ],

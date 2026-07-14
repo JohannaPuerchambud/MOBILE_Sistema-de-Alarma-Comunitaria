@@ -7,7 +7,8 @@ import '../auth/token_storage.dart';
 import 'api.dart';
 
 class PushNotificationService {
-  static final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  static final FirebaseMessaging _firebaseMessaging =
+      FirebaseMessaging.instance;
 
   /// Contexto global para mostrar SnackBars desde cualquier lugar
   static GlobalKey<NavigatorState>? navigatorKey;
@@ -23,17 +24,18 @@ class PushNotificationService {
     );
 
     if (settings.authorizationStatus == AuthorizationStatus.authorized) {
-      print('✅ Permisos de notificación concedidos.');
-    } else if (settings.authorizationStatus == AuthorizationStatus.provisional) {
-      print('⚠️ Permisos provisionales de notificación.');
+      debugPrint('✅ Permisos de notificación concedidos.');
+    } else if (settings.authorizationStatus ==
+        AuthorizationStatus.provisional) {
+      debugPrint('⚠️ Permisos provisionales de notificación.');
     } else {
-      print('❌ Permisos de notificación denegados.');
+      debugPrint('❌ Permisos de notificación denegados.');
       return;
     }
 
     // 2. Obtener el "FCM Token" único de este celular
     String? token = await _firebaseMessaging.getToken();
-    print("FCM Token obtenido correctamente.");
+    debugPrint("FCM Token obtenido correctamente.");
 
     // 3. Enviar este token a nuestra API en Node.js
     if (token != null) {
@@ -42,13 +44,15 @@ class PushNotificationService {
 
     // 4. Actualizar el token en el servidor si Firebase decide cambiarlo
     _firebaseMessaging.onTokenRefresh.listen((newToken) {
-      print("🔄 Token FCM renovado, actualizando en el servidor...");
+      debugPrint("🔄 Token FCM renovado, actualizando en el servidor...");
       sendTokenToBackend(newToken);
     });
 
     // 5. Handler para notificaciones recibidas con la app ABIERTA (foreground)
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('💌 Alerta recibida con la app abierta: ${message.notification?.title}');
+      debugPrint(
+        '💌 Alerta recibida con la app abierta: ${message.notification?.title}',
+      );
 
       final title = message.notification?.title ?? "Notificación";
       final body = message.notification?.body ?? "";
@@ -64,12 +68,15 @@ class PushNotificationService {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-              if (body.isNotEmpty) Text(body, style: const TextStyle(fontSize: 13)),
+              if (body.isNotEmpty)
+                Text(body, style: const TextStyle(fontSize: 13)),
             ],
           ),
           backgroundColor: const Color(0xFF667EEA),
           behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           duration: const Duration(seconds: 5),
         ),
       );
@@ -77,14 +84,19 @@ class PushNotificationService {
 
     // 6. Handler para cuando el usuario toca la notificación (app en background)
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('📲 Notificación tocada (background): ${message.notification?.title}');
+      debugPrint(
+        '📲 Notificación tocada (background): ${message.notification?.title}',
+      );
       // Aquí podrías navegar a una pantalla específica si lo necesitas
     });
 
     // 7. Verificar si la app fue abierta desde una notificación (terminated)
-    RemoteMessage? initialMessage = await _firebaseMessaging.getInitialMessage();
+    RemoteMessage? initialMessage = await _firebaseMessaging
+        .getInitialMessage();
     if (initialMessage != null) {
-      print('🚀 App abierta desde notificación: ${initialMessage.notification?.title}');
+      debugPrint(
+        '🚀 App abierta desde notificación: ${initialMessage.notification?.title}',
+      );
     }
   }
 
@@ -96,22 +108,46 @@ class PushNotificationService {
 
       final url = Uri.parse("${ApiConfig.baseUrl}/users/fcm-token");
 
-      final response = await http.post(
-        url,
-        headers: {
-          "Authorization": "Bearer $userToken",
-          "Content-Type": "application/json",
-        },
-        body: json.encode({"fcm_token": fcmToken}),
-      );
+      final response = await http
+          .post(
+            url,
+            headers: {
+              "Authorization": "Bearer $userToken",
+              "Content-Type": "application/json",
+            },
+            body: json.encode({"fcm_token": fcmToken}),
+          )
+          .timeout(ApiConfig.requestTimeout);
 
       if (response.statusCode == 200) {
-        print("✅ Token FCM guardado en la base de datos PostgreSQL.");
+        debugPrint("✅ Token FCM guardado en la base de datos PostgreSQL.");
       } else {
-        print("⚠️ Error al guardar FCM token: ${response.statusCode}");
+        debugPrint("⚠️ Error al guardar FCM token: ${response.statusCode}");
       }
     } catch (e) {
-      print("❌ Error enviando FCM token al backend: $e");
+      debugPrint("❌ Error enviando FCM token al backend: $e");
+    }
+  }
+
+  static Future<void> unregisterCurrentDevice() async {
+    try {
+      final userToken = await TokenStorage().getToken();
+      final fcmToken = await _firebaseMessaging.getToken();
+      if (userToken == null || fcmToken == null) return;
+
+      final url = Uri.parse("${ApiConfig.baseUrl}/users/fcm-token");
+      await http
+          .delete(
+            url,
+            headers: {
+              "Authorization": "Bearer $userToken",
+              "Content-Type": "application/json",
+            },
+            body: json.encode({"fcm_token": fcmToken}),
+          )
+          .timeout(ApiConfig.requestTimeout);
+    } catch (e) {
+      debugPrint("No se pudo desregistrar el token FCM: $e");
     }
   }
 }

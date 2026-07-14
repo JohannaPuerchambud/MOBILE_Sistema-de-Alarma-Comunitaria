@@ -1,10 +1,10 @@
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:socket_io_client/socket_io_client.dart' as io;
 import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
 import 'chat_model.dart';
 
 class ChatService {
-  IO.Socket? _socket;
+  io.Socket? _socket;
 
   final _storage = TokenStorage();
 
@@ -24,16 +24,13 @@ class ChatService {
     // Si ya hay socket, desconectar primero
     disconnect();
 
-    _socket = IO.io(
-      ApiConfig.socketUrl,
-      <String, dynamic>{
-        "transports": ["websocket"],
-        "autoConnect": false,
-        // esto llega en socket.handshake.auth.token
-        "forceNew": true,
-        "auth": {"token": token},
-      },
-    );
+    _socket = io.io(ApiConfig.socketUrl, <String, dynamic>{
+      "transports": ["websocket"],
+      "autoConnect": false,
+      // esto llega en socket.handshake.auth.token
+      "forceNew": true,
+      "auth": {"token": token},
+    });
 
     _socket!.onConnect((_) {
       // conectado

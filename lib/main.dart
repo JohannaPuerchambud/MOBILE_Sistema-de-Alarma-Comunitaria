@@ -12,7 +12,9 @@ import 'package:intl/date_symbol_data_local.dart';
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  print("💌 Notificación con app cerrada recibida: ${message.notification?.title}");
+  debugPrint(
+    "💌 Notificación con app cerrada recibida: ${message.notification?.title}",
+  );
 }
 
 // ✅ Clave global del Navigator para mostrar SnackBars desde FCM
@@ -21,9 +23,7 @@ final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await initializeDateFormatting('es_ES', null);
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
@@ -80,9 +80,7 @@ class AuthGate extends StatelessWidget {
           );
         }
 
-        return snapshot.data == true
-            ? const HomePage()
-            : const LoginPage();
+        return snapshot.data == true ? const HomePage() : const LoginPage();
       },
     );
   }

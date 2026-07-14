@@ -51,7 +51,7 @@ class ReportService {
         "Authorization": "Bearer $token",
         "Content-Type": "application/json",
       },
-    );
+    ).timeout(ApiConfig.requestTimeout);
 
     if (res.statusCode == 200) {
       final data = _safeJsonDecode(res.body);
@@ -100,7 +100,7 @@ class ReportService {
       );
     }
 
-    final streamedResponse = await request.send();
+    final streamedResponse = await request.send().timeout(ApiConfig.requestTimeout);
     final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {

@@ -55,6 +55,7 @@ class _ReportListPageState extends State<ReportListPage> {
   }
 
   Future<void> _load() async {
+    if (!mounted) return;
     setState(() {
       loading = true;
       error = null;
@@ -62,11 +63,13 @@ class _ReportListPageState extends State<ReportListPage> {
 
     try {
       final data = await _service.getNeighborhoodReports();
+      if (!mounted) return;
       setState(() => reports = data);
     } catch (e) {
+      if (!mounted) return;
       setState(() => error = e.toString());
     } finally {
-      setState(() => loading = false);
+      if (mounted) setState(() => loading = false);
     }
   }
 
