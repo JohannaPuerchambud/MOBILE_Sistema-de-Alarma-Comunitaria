@@ -1,3 +1,5 @@
+import '../../core/utils/ecuador_time.dart';
+
 class ChatMessage {
   final int messageId;
   final int userId;
@@ -18,17 +20,6 @@ class ChatMessage {
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
-    // El servidor guarda en UTC. Convertimos a hora de Ecuador (UTC-5).
-    DateTime raw = DateTime.tryParse((json['created_at'] ?? '').toString()) ??
-        DateTime.now().toUtc();
-    // Si el string no tiene 'Z' ni offset, lo tratamos como UTC explícitamente
-    if (!raw.isUtc) {
-      raw = DateTime.utc(
-          raw.year, raw.month, raw.day, raw.hour, raw.minute, raw.second, raw.millisecond);
-    }
-    // UTC-5 = Ecuador (America/Guayaquil)
-    final ecuadorTime = raw.subtract(const Duration(hours: 5));
-
     return ChatMessage(
       messageId: (json['message_id'] ?? 0) as int,
       userId: (json['user_id'] ?? 0) as int,
@@ -36,7 +27,7 @@ class ChatMessage {
       lastName: json['last_name'] as String?,
       message: (json['message'] ?? '') as String,
       imageUrl: json['image_url'] as String?,
-      createdAt: ecuadorTime,
+      createdAt: EcuadorTime.parse(json['created_at']),
     );
   }
 

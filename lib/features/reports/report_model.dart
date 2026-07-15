@@ -1,3 +1,5 @@
+import '../../core/utils/ecuador_time.dart';
+
 class ReportModel {
   final int reportId;
   final int userId;
@@ -22,22 +24,12 @@ class ReportModel {
   });
 
   factory ReportModel.fromJson(Map<String, dynamic> json) {
-    // El servidor guarda en UTC. Convertimos a hora de Ecuador (UTC-5).
-    DateTime raw = DateTime.tryParse((json['created_at'] ?? '').toString()) ??
-        DateTime.now().toUtc();
-    if (!raw.isUtc) {
-      raw = DateTime.utc(
-          raw.year, raw.month, raw.day, raw.hour, raw.minute, raw.second, raw.millisecond);
-    }
-    // UTC-5 = Ecuador (America/Guayaquil)
-    final ecuadorTime = raw.subtract(const Duration(hours: 5));
-
     return ReportModel(
       reportId: json['report_id'],
       userId: json['user_id'],
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      createdAt: ecuadorTime,
+      createdAt: EcuadorTime.parse(json['created_at']),
       name: json['name'],
       lastName: json['last_name'],
       imageUrl: json['image_url'],
