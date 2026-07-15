@@ -29,6 +29,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   bool connecting = true;
   bool _uploadingImage = false;
+  bool _sendingMessage = false;
+  bool _socketConnected = false;
+  String? _connectionMessage;
   int? myUserId;
   String neighborhoodName = "";
 
@@ -61,6 +64,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     if (bottomInset != _lastKeyboardInset) {
       _lastKeyboardInset = bottomInset;
       _scrollToBottomDelayed();
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _chatService.reconnect();
     }
   }
 
@@ -102,44 +112,76 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     neighborhoodName = '${claims['neighborhood_name'] ?? ""}';
 
     if (mounted) {
-      setState(() {});
+      setState(() {
+        connecting = true;
+        _connectionMessage = null;
+      });
     }
 
     await _chatService.connect(
       onHistory: (history) {
         if (!mounted) return;
         setState(() {
-          messages.clear();
-          messages.addAll(history);
+          messages
+            ..clear()
+            ..addAll(history);
           connecting = false;
         });
-
         _scrollToBottomDelayed();
       },
-      onNewMessage: (msg) {
+      onNewMessage: (message) {
         if (!mounted) return;
-        setState(() {
-          messages.add(msg);
-        });
-
-        _scrollToBottomDelayed();
+        _upsertMessage(message);
       },
-      onError: (err) {
+      onError: (message) {
         if (!mounted) return;
         setState(() => connecting = false);
-        _snack(err);
+        _snack(message);
+      },
+      onConnectionChanged: (connected, message) {
+        if (!mounted) return;
+        setState(() {
+          connecting = false;
+          _socketConnected = connected;
+          _connectionMessage = message;
+        });
       },
     );
   }
 
-  void _send() {
-    final text = _msgCtrl.text.trim();
-    if (text.isEmpty) return;
+  void _upsertMessage(ChatMessage message) {
+    if (!mounted) return;
 
-    _chatService.sendMessage(text);
-    _msgCtrl.clear();
-
+    setState(() {
+      final index = messages.indexWhere(
+        (item) => item.messageId == message.messageId,
+      );
+      if (index >= 0) {
+        messages[index] = message;
+      } else {
+        messages.add(message);
+      }
+      messages.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    });
     _scrollToBottomDelayed();
+  }
+
+  Future<void> _send() async {
+    final text = _msgCtrl.text.trim();
+    if (text.isEmpty || _sendingMessage) return;
+
+    setState(() => _sendingMessage = true);
+    try {
+      final sentMessage = await _chatService.sendMessage(text);
+      _upsertMessage(sentMessage);
+      _msgCtrl.clear();
+    } catch (error) {
+      _snack(ChatService.userMessageForError(error));
+    } finally {
+      if (mounted) {
+        setState(() => _sendingMessage = false);
+      }
+    }
   }
 
   // ✅ Menú para elegir entre Cámara y Galería para el chat
@@ -197,35 +239,60 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       );
 
       if (pickedFile == null) return;
-
       setState(() => _uploadingImage = true);
 
-      // ✅ Subir imagen al backend (que la sube a Firebase Storage con Admin SDK)
       final token = await TokenStorage().getToken();
-      final url = Uri.parse("${ApiConfig.baseUrl}/chat/upload-image");
-      final request = http.MultipartRequest("POST", url);
-      request.headers["Authorization"] = "Bearer $token";
-      request.files.add(
-        await http.MultipartFile.fromPath("image", pickedFile.path),
-      );
-
-      final streamedRes = await request.send().timeout(
-        ApiConfig.requestTimeout,
-      );
-      final res = await http.Response.fromStream(streamedRes);
-
-      if (res.statusCode == 200) {
-        final data = json.decode(res.body);
-        final downloadUrl = data['image_url'];
-
-        // Enviar mensaje con imagen via Socket.IO
-        _chatService.sendMessage('', imageUrl: downloadUrl);
-        _scrollToBottomDelayed();
-      } else {
-        _snack("Error al subir la imagen.");
+      if (token == null || token.isEmpty) {
+        throw const ChatException(
+          'Tu sesión terminó. Inicia sesión nuevamente.',
+        );
       }
-    } catch (e) {
-      _snack("Error al enviar la imagen. Intenta de nuevo.");
+
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse('${ApiConfig.baseUrl}/chat/upload-image'),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files.add(
+        await http.MultipartFile.fromPath('image', pickedFile.path),
+      );
+
+      final streamedResponse = await request.send().timeout(
+        ApiConfig.chatRequestTimeout,
+      );
+      final response = await http.Response.fromStream(streamedResponse);
+
+      if (response.statusCode != 200) {
+        var message =
+            'No se pudo guardar la imagen. Puedes enviar un mensaje de texto.';
+        try {
+          final decoded = json.decode(response.body);
+          if (decoded is Map && decoded['message'] != null) {
+            message = decoded['message'].toString();
+          }
+        } catch (_) {
+          // La API no devolvió JSON; se conserva el mensaje seguro.
+        }
+        throw ChatException(message);
+      }
+
+      final decoded = json.decode(response.body);
+      final downloadUrl = decoded is Map
+          ? decoded['image_url']?.toString()
+          : null;
+      if (downloadUrl == null || downloadUrl.isEmpty) {
+        throw const ChatException(
+          'La imagen se guardó, pero la API no devolvió una dirección válida.',
+        );
+      }
+
+      final sentMessage = await _chatService.sendMessage(
+        '',
+        imageUrl: downloadUrl,
+      );
+      _upsertMessage(sentMessage);
+    } catch (error) {
+      _snack(ChatService.userMessageForError(error));
     } finally {
       if (mounted) {
         setState(() => _uploadingImage = false);
@@ -482,6 +549,41 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             const LinearProgressIndicator(
               color: Color(0xFF667EEA),
               backgroundColor: Colors.white,
+            ),
+
+          if (!connecting && !_socketConnected)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.fromLTRB(16, 10, 8, 10),
+              color: const Color(0xFFFFF4E5),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.cloud_off_outlined,
+                    size: 20,
+                    color: Color(0xFF9A6700),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      _connectionMessage ??
+                          'Reconectando el chat en tiempo real…',
+                      style: const TextStyle(
+                        color: Color(0xFF6B4E00),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: () {
+                      setState(() => connecting = true);
+                      _chatService.reconnect();
+                    },
+                    child: const Text('Reintentar'),
+                  ),
+                ],
+              ),
             ),
 
           // ✅ Indicador de subida de imagen
@@ -847,7 +949,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 children: [
                   // ✅ Botón de adjuntar foto
                   IconButton(
-                    onPressed: _uploadingImage
+                    onPressed: _uploadingImage || _sendingMessage
                         ? null
                         : _showImageSourceActionSheet,
                     icon: Icon(
@@ -890,8 +992,17 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       shape: BoxShape.circle,
                     ),
                     child: IconButton(
-                      onPressed: _send,
-                      icon: const Icon(Icons.send_rounded, color: Colors.white),
+                      onPressed: _sendingMessage ? null : _send,
+                      icon: _sendingMessage
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Icon(Icons.send_rounded, color: Colors.white),
                     ),
                   ),
                 ],

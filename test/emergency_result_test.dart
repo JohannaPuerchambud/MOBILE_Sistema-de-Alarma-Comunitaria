@@ -38,7 +38,10 @@ void main() {
     });
 
     expect(result.pushInvalidated, 3);
-    expect(result.userMessage, contains('tokens push registrados estaban vencidos'));
+    expect(
+      result.userMessage,
+      contains('tokens push registrados estaban vencidos'),
+    );
   });
 
   test('informa cuando Twilio requiere verificar el numero destino', () {
@@ -51,5 +54,25 @@ void main() {
 
     expect(result.twilioErrorCode, '21608');
     expect(result.userMessage, contains('verificado en Twilio'));
+  });
+
+  test('confirma la emergencia aunque falle la evidencia', () {
+    final result = EmergencyResult.fromJson({
+      'delivery': {
+        'evidence': {
+          'status': 'failed',
+          'warning': {'message': 'La emergencia se registró sin evidencia.'},
+        },
+        'push': {'status': 'unavailable'},
+        'twilio': {'status': 'not_configured'},
+      },
+    });
+
+    expect(result.evidenceStatus, 'failed');
+    expect(
+      result.userMessage,
+      contains('emergencia se registró sin evidencia'),
+    );
+    expect(result.userMessage, contains('notificaciones no estuvo disponible'));
   });
 }

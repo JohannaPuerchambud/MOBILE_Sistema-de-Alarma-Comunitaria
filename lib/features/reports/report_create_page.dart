@@ -40,16 +40,28 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
         child: Wrap(
           children: [
             ListTile(
-              leading: const Icon(Icons.camera_alt_outlined, color: Color(0xFF667EEA)),
-              title: const Text('Tomar foto con la cámara', style: TextStyle(fontWeight: FontWeight.w500)),
+              leading: const Icon(
+                Icons.camera_alt_outlined,
+                color: Color(0xFF667EEA),
+              ),
+              title: const Text(
+                'Tomar foto con la cámara',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               onTap: () {
                 Navigator.pop(context); // Cierra el menú
                 _pickImage(ImageSource.camera); // Llama a la cámara
               },
             ),
             ListTile(
-              leading: const Icon(Icons.photo_library_outlined, color: Color(0xFF667EEA)),
-              title: const Text('Elegir de la galería', style: TextStyle(fontWeight: FontWeight.w500)),
+              leading: const Icon(
+                Icons.photo_library_outlined,
+                color: Color(0xFF667EEA),
+              ),
+              title: const Text(
+                'Elegir de la galería',
+                style: TextStyle(fontWeight: FontWeight.w500),
+              ),
               onTap: () {
                 Navigator.pop(context); // Cierra el menú
                 _pickImage(ImageSource.gallery); // Llama a la galería
@@ -77,7 +89,9 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
         });
       }
     } catch (e) {
-      setState(() => error = "Error al abrir la cámara/galería. Revisa los permisos.");
+      setState(
+        () => error = "Error al abrir la cámara/galería. Revisa los permisos.",
+      );
     }
   }
 
@@ -98,19 +112,22 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
     try {
       // ✅ Enviamos todo al backend (incluida la imagen como archivo)
       // El backend se encarga de subir la imagen a Firebase Storage de forma segura
-      await _service.createReport(
+      final submission = await _service.createReport(
         title: title,
         description: desc,
         imageFile: _imageFile, // ✅ Enviamos el archivo directamente
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Reporte enviado ✅")),
-      );
+      final confirmation = submission.warnings.isEmpty
+          ? "Reporte enviado correctamente."
+          : "Reporte enviado. ${submission.warnings.join(' ')}";
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(confirmation)));
       Navigator.pop(context, true);
     } catch (e) {
-      setState(() => error = e.toString());
+      setState(() => error = e.toString().replaceFirst("Exception: ", ""));
     } finally {
       setState(() => loading = false);
     }
@@ -120,8 +137,10 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Nuevo Reporte",
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        title: const Text(
+          "Nuevo Reporte",
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         flexibleSpace: Container(
           decoration: const BoxDecoration(
@@ -142,16 +161,21 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
               elevation: 4,
               shadowColor: Colors.black26,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
+                borderRadius: BorderRadius.circular(20),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(24.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text("Título de la alerta", style: TextStyle(
+                    const Text(
+                      "Título de la alerta",
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF555555),
-                        fontSize: 14)),
+                        fontSize: 14,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _titleCtrl,
@@ -160,22 +184,32 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                         filled: true,
                         fillColor: const Color(0xFFF8F9FA),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                                color: Color(0xFFE0E0E0), width: 1.5)),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            width: 1.5,
+                          ),
+                        ),
                         focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                                color: Color(0xFF667EEA), width: 2)),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF667EEA),
+                            width: 2,
+                          ),
+                        ),
                       ),
                       maxLength: 100,
                     ),
                     const SizedBox(height: 10),
 
-                    const Text("Descripción detallada", style: TextStyle(
+                    const Text(
+                      "Descripción detallada",
+                      style: TextStyle(
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF555555),
-                        fontSize: 14)),
+                        fontSize: 14,
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _descCtrl,
@@ -184,22 +218,32 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                         filled: true,
                         fillColor: const Color(0xFFF8F9FA),
                         enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                                color: Color(0xFFE0E0E0), width: 1.5)),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            width: 1.5,
+                          ),
+                        ),
                         focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: const BorderSide(
-                                color: Color(0xFF667EEA), width: 2)),
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: const BorderSide(
+                            color: Color(0xFF667EEA),
+                            width: 2,
+                          ),
+                        ),
                       ),
                       maxLines: 4,
                     ),
                     const SizedBox(height: 20),
 
-                    const Text("Evidencia fotográfica (Opcional)",
-                        style: TextStyle(fontWeight: FontWeight.w600,
-                            color: Color(0xFF555555),
-                            fontSize: 14)),
+                    const Text(
+                      "Evidencia fotográfica (Opcional)",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF555555),
+                        fontSize: 14,
+                      ),
+                    ),
                     const SizedBox(height: 10),
                     GestureDetector(
                       // ✅ LLAMAMOS AL MENÚ PARA ELEGIR CÁMARA O GALERÍA
@@ -209,39 +253,56 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                         width: double.infinity,
                         decoration: BoxDecoration(
                           color: const Color(0xFFF8F9FA),
-                          border: Border.all(color: const Color(0xFFE0E0E0),
-                              width: 2,
-                              style: BorderStyle.solid),
+                          border: Border.all(
+                            color: const Color(0xFFE0E0E0),
+                            width: 2,
+                            style: BorderStyle.solid,
+                          ),
                           borderRadius: BorderRadius.circular(15),
                         ),
                         child: _imageFile != null
                             ? ClipRRect(
-                          borderRadius: BorderRadius.circular(13),
-                          child: Image.file(_imageFile!, fit: BoxFit.cover),
-                        )
+                                borderRadius: BorderRadius.circular(13),
+                                child: Image.file(
+                                  _imageFile!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
                             : const Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.add_a_photo_outlined, size: 50,
-                                color: Color(0xFF999999)),
-                            SizedBox(height: 12),
-                            Text("Toca para tomar o subir una foto", style: TextStyle(
-                                color: Color(0xFF777777),
-                                fontWeight: FontWeight.w500)),
-                          ],
-                        ),
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 50,
+                                    color: Color(0xFF999999),
+                                  ),
+                                  SizedBox(height: 12),
+                                  Text(
+                                    "Toca para tomar o subir una foto",
+                                    style: TextStyle(
+                                      color: Color(0xFF777777),
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                     if (_imageFile != null)
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton.icon(
-                            onPressed: loading ? null : () =>
-                                setState(() => _imageFile = null),
-                            icon: const Icon(Icons.delete_outline,
-                                color: Colors.redAccent),
-                            label: const Text("Quitar foto",
-                                style: TextStyle(color: Colors.redAccent))
+                          onPressed: loading
+                              ? null
+                              : () => setState(() => _imageFile = null),
+                          icon: const Icon(
+                            Icons.delete_outline,
+                            color: Colors.redAccent,
+                          ),
+                          label: const Text(
+                            "Quitar foto",
+                            style: TextStyle(color: Colors.redAccent),
+                          ),
                         ),
                       ),
                     const SizedBox(height: 16),
@@ -249,8 +310,13 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                     if (error != null)
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Text(error!, style: const TextStyle(color: Colors
-                            .redAccent, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          error!,
+                          style: const TextStyle(
+                            color: Colors.redAccent,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
 
                     SizedBox(
@@ -269,17 +335,26 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                             backgroundColor: Colors.transparent,
                             shadowColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10)),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
                           ),
                           child: loading
-                              ? const SizedBox(height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                  color: Colors.white, strokeWidth: 2.5))
-                              : const Text("Enviar Reporte", style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white)),
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                    strokeWidth: 2.5,
+                                  ),
+                                )
+                              : const Text(
+                                  "Enviar Reporte",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                         ),
                       ),
                     ),

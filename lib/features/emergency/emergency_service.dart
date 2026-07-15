@@ -14,6 +14,8 @@ class EmergencyResult {
   final int pushSuccess;
   final int pushFailure;
   final int pushInvalidated;
+  final String evidenceStatus;
+  final String? evidenceWarning;
 
   const EmergencyResult({
     required this.twilioStatus,
@@ -23,6 +25,8 @@ class EmergencyResult {
     required this.pushSuccess,
     required this.pushFailure,
     required this.pushInvalidated,
+    this.evidenceStatus = 'not_provided',
+    this.evidenceWarning,
   });
 
   factory EmergencyResult.fromJson(Map<String, dynamic> data) {
@@ -40,25 +44,57 @@ class EmergencyResult {
 
     final twilio = delivery['twilio'];
     final push = delivery['push'];
+    final evidence = delivery['evidence'];
 
     return EmergencyResult(
-      twilioStatus: twilio is Map ? '${twilio['status'] ?? 'unknown'}' : 'unknown',
+      twilioStatus: twilio is Map
+          ? '${twilio['status'] ?? 'unknown'}'
+          : 'unknown',
       twilioErrorCode: twilio is Map && twilio['error_code'] != null
           ? '${twilio['error_code']}'
           : null,
       pushStatus: push is Map ? '${push['status'] ?? 'unknown'}' : 'unknown',
-      pushAttempted: push is Map ? int.tryParse('${push['attempted'] ?? 0}') ?? 0 : 0,
-      pushSuccess: push is Map ? int.tryParse('${push['success'] ?? 0}') ?? 0 : 0,
-      pushFailure: push is Map ? int.tryParse('${push['failure'] ?? 0}') ?? 0 : 0,
-      pushInvalidated: push is Map ? int.tryParse('${push['invalidated'] ?? 0}') ?? 0 : 0,
+      pushAttempted: push is Map
+          ? int.tryParse('${push['attempted'] ?? 0}') ?? 0
+          : 0,
+      pushSuccess: push is Map
+          ? int.tryParse('${push['success'] ?? 0}') ?? 0
+          : 0,
+      pushFailure: push is Map
+          ? int.tryParse('${push['failure'] ?? 0}') ?? 0
+          : 0,
+      pushInvalidated: push is Map
+          ? int.tryParse('${push['invalidated'] ?? 0}') ?? 0
+          : 0,
+      evidenceStatus: evidence is Map
+          ? '${evidence['status'] ?? 'not_provided'}'
+          : 'not_provided',
+      evidenceWarning: evidence is Map && evidence['warning'] is Map
+          ? '${evidence['warning']['message'] ?? ''}'
+          : null,
     );
   }
-
   String get userMessage {
     final pushMessage = _pushMessage;
     final twilioMessage = _twilioMessage;
+    final evidenceMessage = _evidenceMessage;
 
-    return 'La emergencia quedo registrada. $pushMessage $twilioMessage';
+    return 'La emergencia quedó registrada. $pushMessage $twilioMessage $evidenceMessage';
+  }
+
+  String get _evidenceMessage {
+    if (evidenceStatus == 'uploaded') {
+      return 'La evidencia fotográfica quedó adjunta.';
+    }
+
+    if (evidenceStatus == 'failed') {
+      final detail = (evidenceWarning ?? '').trim();
+      return detail.isEmpty
+          ? 'La emergencia se registró sin evidencia fotográfica.'
+          : detail;
+    }
+
+    return '';
   }
 
   String get _pushMessage {
@@ -80,6 +116,9 @@ class EmergencyResult {
       return 'No se pudieron enviar las notificaciones push.';
     }
 
+    if (pushStatus == 'unavailable') {
+      return 'La emergencia se registró, pero el servicio de notificaciones no estuvo disponible.';
+    }
     if (pushStatus == 'no_recipients') {
       return 'No habia otros dispositivos registrados para recibir push.';
     }
@@ -88,7 +127,12 @@ class EmergencyResult {
   }
 
   String get _twilioMessage {
-    if (['queued', 'ringing', 'in-progress', 'completed'].contains(twilioStatus)) {
+    if ([
+      'queued',
+      'ringing',
+      'in-progress',
+      'completed',
+    ].contains(twilioStatus)) {
       return 'La llamada a la alarma fue creada correctamente.';
     }
 
@@ -117,7 +161,9 @@ class EmergencyResult {
     }
 
     if (twilioStatus == 'failed') {
-      final code = twilioErrorCode == null ? '' : ' Codigo Twilio: $twilioErrorCode.';
+      final code = twilioErrorCode == null
+          ? ''
+          : ' Codigo Twilio: $twilioErrorCode.';
       return 'No se pudo crear la llamada a la alarma.$code';
     }
 
@@ -155,12 +201,17 @@ class EmergencyService {
         await http.MultipartFile.fromPath(
           "image",
           imageFile.path,
-          contentType: MediaType('image', extension), // Le avisa a Node.js que es imagen
+          contentType: MediaType(
+            'image',
+            extension,
+          ), // Le avisa a Node.js que es imagen
         ),
       );
     }
 
-    final streamedResponse = await request.send().timeout(ApiConfig.emergencyTimeout);
+    final streamedResponse = await request.send().timeout(
+      ApiConfig.emergencyTimeout,
+    );
     final res = await http.Response.fromStream(streamedResponse);
 
     if (res.statusCode != 201) {
@@ -169,13 +220,16 @@ class EmergencyService {
       if (body.startsWith('<!') || body.startsWith('<html')) {
         throw Exception(
           "El servidor no está disponible en este momento. "
-              "Intenta de nuevo en unos segundos.",
+          "Intenta de nuevo en unos segundos.",
         );
       }
       // Parsear error JSON del backend
       try {
         final errorData = json.decode(body);
-        final msg = errorData['message'] ?? errorData['error'] ?? "Error al activar la emergencia.";
+        final msg =
+            errorData['message'] ??
+            errorData['error'] ??
+            "Error al activar la emergencia.";
         throw Exception(msg);
       } on FormatException {
         throw Exception("Error al activar la emergencia.");
