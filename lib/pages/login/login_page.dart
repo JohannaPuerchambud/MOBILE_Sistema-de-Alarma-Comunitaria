@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../core/auth/auth_service.dart';
 import '../../core/auth/token_storage.dart';
+import '../../core/auth/roles.dart';
 import '../home/home_page.dart';
 
 class LoginPage extends StatefulWidget {
@@ -36,10 +37,12 @@ class _LoginPageState extends State<LoginPage> {
         final claims = JwtDecoder.decode(token);
         final role = int.tryParse('${claims['role']}');
 
-        if (role != 3) {
+        if (!canAccessCommunityFeatures(role)) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Esta aplicación es exclusiva para vecinos.'),
+              content: Text(
+                'Esta aplicación es exclusiva para miembros del barrio.',
+              ),
               backgroundColor: Colors.redAccent,
             ),
           );

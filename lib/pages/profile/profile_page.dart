@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../core/auth/token_storage.dart';
+import '../../core/auth/roles.dart';
 import '../../core/config/fcm_service.dart';
 import '../login/login_page.dart';
 
@@ -35,7 +36,7 @@ class _ProfilePageState extends State<ProfilePage> {
       setState(() {
         userName = "${claims['name'] ?? ''} ${claims['last_name'] ?? ''}"
             .trim();
-        userRole = claims['role'] == 3 ? "Vecino" : "Administrador";
+        userRole = communityRoleLabel(int.tryParse('${claims['role']}'));
         userEmail = claims['email'] ?? "Sin correo";
         userPhone = claims['phone'] ?? "Sin teléfono";
         userAddress = claims['address'] ?? "Sin dirección registrada";

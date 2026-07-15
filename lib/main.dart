@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'firebase_options.dart';
 
 import 'core/auth/token_storage.dart';
+import 'core/auth/roles.dart';
 import 'pages/login/login_page.dart';
 import 'pages/home/home_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -57,7 +58,7 @@ class AuthGate extends StatelessWidget {
 
       final claims = JwtDecoder.decode(token);
       final role = int.tryParse('${claims['role']}');
-      if (role != 3) {
+      if (!canAccessCommunityFeatures(role)) {
         await TokenStorage().clearToken();
         return false;
       }

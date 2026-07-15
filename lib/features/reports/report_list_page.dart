@@ -4,6 +4,7 @@ import 'package:jwt_decoder/jwt_decoder.dart';
 import 'report_model.dart';
 import 'report_service.dart';
 import '../../core/auth/token_storage.dart';
+import '../../core/auth/roles.dart';
 
 class ReportListPage extends StatefulWidget {
   const ReportListPage({super.key});
@@ -82,7 +83,7 @@ class _ReportListPageState extends State<ReportListPage> {
 
   @override
   Widget build(BuildContext context) {
-    final canCreateReport = roleId == 3; // ✅ solo Usuario
+    final canCreateReport = canAccessCommunityFeatures(roleId);
 
     return Scaffold(
       appBar: AppBar(
@@ -243,7 +244,7 @@ class _ReportListPageState extends State<ReportListPage> {
                           children: [
                             Icon(Icons.info_outline, color: Colors.redAccent, size: 16),
                             SizedBox(width: 6),
-                            Text("Solo el rol Usuario puede crear reportes.", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
+                            Text("Solo los miembros del barrio pueden crear reportes.", style: TextStyle(fontSize: 12, color: Colors.redAccent)),
                           ],
                         ),
                       ),
