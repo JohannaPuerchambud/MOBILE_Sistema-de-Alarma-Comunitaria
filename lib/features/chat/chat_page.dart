@@ -8,6 +8,8 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 import 'chat_service.dart';
 import 'chat_model.dart';
 
@@ -339,35 +341,42 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   // ✅ Widget para renderizar la imagen dentro de la burbuja
   Widget _buildChatImage(String imageUrl, bool isMine) {
-    return GestureDetector(
-      onTap: () => _showFullImage(imageUrl),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          imageUrl,
-          width: 220,
-          height: 220,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              width: 220,
-              height: 220,
+    final imageSize = (MediaQuery.sizeOf(context).width * 0.62)
+        .clamp(180.0, 220.0)
+        .toDouble();
+    return Semantics(
+      button: true,
+      label: 'Abrir imagen adjunta',
+      child: GestureDetector(
+        onTap: () => _showFullImage(imageUrl),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(12),
+          child: Image.network(
+            imageUrl,
+            width: imageSize,
+            height: imageSize,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                width: imageSize,
+                height: imageSize,
+                color: isMine ? Colors.white24 : Colors.grey[200],
+                child: const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF667EEA),
+                    strokeWidth: 2,
+                  ),
+                ),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: imageSize,
+              height: imageSize,
               color: isMine ? Colors.white24 : Colors.grey[200],
               child: const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF667EEA),
-                  strokeWidth: 2,
-                ),
+                child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
               ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: 220,
-            height: 220,
-            color: isMine ? Colors.white24 : Colors.grey[200],
-            child: const Center(
-              child: Icon(Icons.broken_image, color: Colors.grey, size: 40),
             ),
           ),
         ),
@@ -415,60 +424,67 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
   /// Construye el botón de "Ver Ubicación" para mensajes de emergencia.
   Widget _buildLocationButton(String mapsUrl, bool isMine) {
-    return GestureDetector(
-      onTap: () async {
-        try {
-          final uri = Uri.parse(mapsUrl);
-          await launchUrl(uri, mode: LaunchMode.externalApplication);
-        } catch (e) {
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('No se pudo abrir Google Maps')),
-            );
+    return Semantics(
+      button: true,
+      label: 'Abrir ubicación en Google Maps',
+      child: GestureDetector(
+        onTap: () async {
+          try {
+            final uri = Uri.parse(mapsUrl);
+            await launchUrl(uri, mode: LaunchMode.externalApplication);
+          } catch (e) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('No se pudo abrir Google Maps')),
+              );
+            }
           }
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.only(top: 8),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isMine
-                ? [
-                    Colors.white.withValues(alpha: 0.25),
-                    Colors.white.withValues(alpha: 0.10),
-                  ]
-                : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
-          ),
-          borderRadius: BorderRadius.circular(12),
-          border: isMine
-              ? Border.all(color: Colors.white.withValues(alpha: 0.4), width: 1)
-              : null,
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.location_on,
-              size: 18,
-              color: isMine ? Colors.white : Colors.white,
+        },
+        child: Container(
+          margin: const EdgeInsets.only(top: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isMine
+                  ? [
+                      Colors.white.withValues(alpha: 0.25),
+                      Colors.white.withValues(alpha: 0.10),
+                    ]
+                  : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
             ),
-            const SizedBox(width: 6),
-            Text(
-              '📍 Ver Ubicación',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
+            borderRadius: BorderRadius.circular(12),
+            border: isMine
+                ? Border.all(
+                    color: Colors.white.withValues(alpha: 0.4),
+                    width: 1,
+                  )
+                : null,
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.location_on,
+                size: 18,
                 color: isMine ? Colors.white : Colors.white,
               ),
-            ),
-            const SizedBox(width: 4),
-            Icon(
-              Icons.open_in_new,
-              size: 14,
-              color: isMine ? Colors.white70 : Colors.white70,
-            ),
-          ],
+              const SizedBox(width: 6),
+              Text(
+                '📍 Ver Ubicación',
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: isMine ? Colors.white : Colors.white,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Icon(
+                Icons.open_in_new,
+                size: 14,
+                color: isMine ? Colors.white70 : Colors.white70,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -520,29 +536,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      appBar: AppBar(
-        title: Text(
-          neighborhoodName.isEmpty
-              ? 'Chat Barrial'
-              : 'Chat Barrial $neighborhoodName',
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-          overflow: TextOverflow.ellipsis,
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+      appBar: AppGradientAppBar(
+        title: neighborhoodName.isEmpty
+            ? 'Chat barrial'
+            : 'Chat barrial - $neighborhoodName',
       ),
-      backgroundColor: const Color(0xFFF4F6F9),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           if (connecting)
@@ -701,6 +700,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   color: isMine
                                       ? const Color(0xFF667EEA)
                                       : Colors.white,
+                                  border: _isEmergencyMessage(m.message)
+                                      ? Border.all(
+                                          color: AppColors.emergency,
+                                          width: 2,
+                                        )
+                                      : null,
                                   // ✅ Ajustamos los bordes si está agrupado
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(16),
@@ -911,7 +916,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                         child: Text(
                                           _formatTime(m.createdAt),
                                           style: TextStyle(
-                                            fontSize: 10,
+                                            fontSize: 12,
                                             color: isMine
                                                 ? Colors.white70
                                                 : Colors.black54,
@@ -949,6 +954,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 children: [
                   // ✅ Botón de adjuntar foto
                   IconButton(
+                    tooltip: 'Adjuntar fotografía',
                     onPressed: _uploadingImage || _sendingMessage
                         ? null
                         : _showImageSourceActionSheet,
@@ -993,6 +999,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     ),
                     child: IconButton(
                       onPressed: _sendingMessage ? null : _send,
+                      tooltip: 'Enviar mensaje',
                       icon: _sendingMessage
                           ? const SizedBox(
                               width: 20,

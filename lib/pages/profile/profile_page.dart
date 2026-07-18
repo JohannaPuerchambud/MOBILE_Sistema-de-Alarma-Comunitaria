@@ -4,6 +4,8 @@ import '../../core/auth/token_storage.dart';
 import '../../core/auth/roles.dart';
 import '../../core/config/fcm_service.dart';
 import '../../core/permissions/app_permissions.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 import 'app_permissions_page.dart';
 import '../login/login_page.dart';
 
@@ -107,35 +109,19 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Mi Perfil",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      backgroundColor: const Color(0xFFF4F6F9),
+      appBar: const AppGradientAppBar(title: 'Mi perfil'),
+      backgroundColor: AppColors.background,
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
+        child: AppResponsiveContent(
+          maxWidth: 680,
+          padding: const EdgeInsets.all(20),
           child: Column(
             children: [
               const SizedBox(height: 10),
               Container(
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                  ),
+                  gradient: AppTheme.brandGradient,
                 ),
                 child: const Padding(
                   padding: EdgeInsets.all(4.0),
@@ -170,10 +156,10 @@ class _ProfilePageState extends State<ProfilePage> {
               const SizedBox(height: 30),
 
               Card(
-                elevation: 4,
-                shadowColor: Colors.black26,
+                elevation: 1.5,
+                shadowColor: Colors.black12,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(18),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8.0),

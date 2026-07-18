@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/config/fcm_service.dart';
 import '../../core/config/connectivity_service.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 import '../../features/reports/report_list_page.dart';
 import '../../features/reports/report_create_page.dart';
 import '../../features/chat/chat_page.dart';
@@ -76,398 +78,403 @@ class _HomePageState extends State<HomePage>
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (ctx) => StatefulBuilder(
-        builder: (ctx, setModalState) => Padding(
-          padding: EdgeInsets.only(
-            bottom: MediaQuery.of(ctx).viewInsets.bottom,
-          ),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        builder: (ctx, setModalState) => SafeArea(
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(ctx).viewInsets.bottom,
             ),
-            padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
-            child: SingleChildScrollView(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Barra decorativa
-                  Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      borderRadius: BorderRadius.circular(2),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Barra decorativa
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
+                    const SizedBox(height: 20),
 
-                  // Ícono de alerta
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.1),
-                      shape: BoxShape.circle,
+                    // Ícono de alerta
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.warning_rounded,
+                        size: 48,
+                        color: AppColors.emergency,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.warning_rounded,
-                      size: 48,
-                      color: Colors.redAccent,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
-                  const Text(
-                    "⚠️ ¿Estás seguro?",
-                    style: TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF333333),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    "Esto activará la sirena del barrio y alertará a todos los vecinos.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                  const SizedBox(height: 20),
-
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Tipo de emergencia',
+                    const Text(
+                      "⚠️ ¿Estás seguro?",
                       style: TextStyle(
-                        fontWeight: FontWeight.w700,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
                         color: Color(0xFF333333),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: emergencyTypes
-                          .map(
-                            (type) => ChoiceChip(
-                              label: Text(type),
-                              selected: emergencyType == type,
-                              onSelected: loading
-                                  ? null
-                                  : (_) => setModalState(() {
-                                      emergencyType = type;
-                                      modalError = null;
-                                    }),
-                              selectedColor: Colors.redAccent.withValues(
-                                alpha: 0.16,
-                              ),
-                              side: BorderSide(
-                                color: emergencyType == type
-                                    ? Colors.redAccent
-                                    : const Color(0xFFD1D5DB),
-                              ),
-                            ),
-                          )
-                          .toList(),
+                    const SizedBox(height: 8),
+                    const Text(
+                      "Esto activará la sirena del barrio y alertará a todos los vecinos.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  // Campo de justificación
-                  TextField(
-                    controller: justificationCtrl,
-                    maxLines: 3,
-                    maxLength: 200,
-                    decoration: InputDecoration(
-                      hintText: emergencyType == 'Otro'
-                          ? 'Describe brevemente la emergencia'
-                          : 'Detalle adicional (opcional)',
-                      hintStyle: const TextStyle(color: Colors.grey),
-                      filled: true,
-                      fillColor: const Color(0xFFF8F9FA),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Color(0xFFE0E0E0),
-                          width: 1.5,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(
-                          color: Colors.redAccent,
-                          width: 2,
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 20),
 
-                  // ✅ Evidencia fotográfica (opcional)
-                  const Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Evidencia fotográfica (Opcional)",
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF555555),
-                        fontSize: 13,
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        'Tipo de emergencia',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF333333),
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: loading
-                        ? null
-                        : () {
-                            showModalBottomSheet(
-                              context: ctx,
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                  top: Radius.circular(20),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: emergencyTypes
+                            .map(
+                              (type) => ChoiceChip(
+                                label: Text(type),
+                                selected: emergencyType == type,
+                                onSelected: loading
+                                    ? null
+                                    : (_) => setModalState(() {
+                                        emergencyType = type;
+                                        modalError = null;
+                                      }),
+                                selectedColor: AppColors.emergency.withValues(
+                                  alpha: 0.16,
                                 ),
-                              ),
-                              builder: (sheetCtx) => SafeArea(
-                                child: Wrap(
-                                  children: [
-                                    ListTile(
-                                      leading: const Icon(
-                                        Icons.camera_alt_outlined,
-                                        color: Colors.redAccent,
-                                      ),
-                                      title: const Text(
-                                        'Tomar foto con la cámara',
-                                      ),
-                                      onTap: () async {
-                                        Navigator.pop(sheetCtx);
-                                        final picked = await picker.pickImage(
-                                          source: ImageSource.camera,
-                                          imageQuality: 60,
-                                          maxWidth: 800,
-                                          maxHeight: 800,
-                                        );
-                                        if (picked != null) {
-                                          setModalState(
-                                            () => evidenceImage = File(
-                                              picked.path,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                    ListTile(
-                                      leading: const Icon(
-                                        Icons.photo_library_outlined,
-                                        color: Colors.redAccent,
-                                      ),
-                                      title: const Text('Elegir de la galería'),
-                                      onTap: () async {
-                                        Navigator.pop(sheetCtx);
-                                        final picked = await picker.pickImage(
-                                          source: ImageSource.gallery,
-                                          imageQuality: 60,
-                                          maxWidth: 800,
-                                          maxHeight: 800,
-                                        );
-                                        if (picked != null) {
-                                          setModalState(
-                                            () => evidenceImage = File(
-                                              picked.path,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ],
+                                side: BorderSide(
+                                  color: emergencyType == type
+                                      ? AppColors.emergency
+                                      : const Color(0xFFD1D5DB),
                                 ),
-                              ),
-                            );
-                          },
-                    child: Container(
-                      height: 120,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFF8F9FA),
-                        border: Border.all(
-                          color: const Color(0xFFE0E0E0),
-                          width: 1.5,
-                        ),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: evidenceImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(11),
-                              child: Image.file(
-                                evidenceImage!,
-                                fit: BoxFit.cover,
                               ),
                             )
-                          : const Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.add_a_photo_outlined,
-                                  size: 32,
-                                  color: Color(0xFF999999),
-                                ),
-                                SizedBox(height: 6),
-                                Text(
-                                  "Toca para adjuntar evidencia",
-                                  style: TextStyle(
-                                    color: Color(0xFF777777),
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
+                            .toList(),
+                      ),
                     ),
-                  ),
-                  if (evidenceImage != null)
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: loading
-                            ? null
-                            : () => setModalState(() => evidenceImage = null),
-                        icon: const Icon(
-                          Icons.delete_outline,
-                          color: Colors.redAccent,
-                          size: 18,
+                    const SizedBox(height: 16),
+                    // Campo de justificación
+                    TextField(
+                      controller: justificationCtrl,
+                      maxLines: 3,
+                      maxLength: 200,
+                      decoration: InputDecoration(
+                        hintText: emergencyType == 'Otro'
+                            ? 'Describe brevemente la emergencia'
+                            : 'Detalle adicional (opcional)',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: const Color(0xFFF8F9FA),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
+                            color: Color(0xFFE0E0E0),
+                            width: 1.5,
+                          ),
                         ),
-                        label: const Text(
-                          "Quitar foto",
-                          style: TextStyle(
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(
                             color: Colors.redAccent,
-                            fontSize: 12,
+                            width: 2,
                           ),
                         ),
                       ),
                     ),
-                  const SizedBox(height: 8),
+                    const SizedBox(height: 12),
 
-                  // ✅ Error de validación dentro del modal (no SnackBar)
-                  if (modalError != null)
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.error_outline,
+                    // ✅ Evidencia fotográfica (opcional)
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Evidencia fotográfica (Opcional)",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF555555),
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    GestureDetector(
+                      onTap: loading
+                          ? null
+                          : () {
+                              showModalBottomSheet(
+                                context: ctx,
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
+                                ),
+                                builder: (sheetCtx) => SafeArea(
+                                  child: Wrap(
+                                    children: [
+                                      ListTile(
+                                        leading: const Icon(
+                                          Icons.camera_alt_outlined,
+                                          color: Colors.redAccent,
+                                        ),
+                                        title: const Text(
+                                          'Tomar foto con la cámara',
+                                        ),
+                                        onTap: () async {
+                                          Navigator.pop(sheetCtx);
+                                          final picked = await picker.pickImage(
+                                            source: ImageSource.camera,
+                                            imageQuality: 60,
+                                            maxWidth: 800,
+                                            maxHeight: 800,
+                                          );
+                                          if (picked != null) {
+                                            setModalState(
+                                              () => evidenceImage = File(
+                                                picked.path,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                      ListTile(
+                                        leading: const Icon(
+                                          Icons.photo_library_outlined,
+                                          color: Colors.redAccent,
+                                        ),
+                                        title: const Text(
+                                          'Elegir de la galería',
+                                        ),
+                                        onTap: () async {
+                                          Navigator.pop(sheetCtx);
+                                          final picked = await picker.pickImage(
+                                            source: ImageSource.gallery,
+                                            imageQuality: 60,
+                                            maxWidth: 800,
+                                            maxHeight: 800,
+                                          );
+                                          if (picked != null) {
+                                            setModalState(
+                                              () => evidenceImage = File(
+                                                picked.path,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                      child: Container(
+                        height: 120,
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF8F9FA),
+                          border: Border.all(
+                            color: const Color(0xFFE0E0E0),
+                            width: 1.5,
+                          ),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: evidenceImage != null
+                            ? ClipRRect(
+                                borderRadius: BorderRadius.circular(11),
+                                child: Image.file(
+                                  evidenceImage!,
+                                  fit: BoxFit.cover,
+                                ),
+                              )
+                            : const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_a_photo_outlined,
+                                    size: 32,
+                                    color: Color(0xFF999999),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    "Toca para adjuntar evidencia",
+                                    style: TextStyle(
+                                      color: Color(0xFF777777),
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                      ),
+                    ),
+                    if (evidenceImage != null)
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton.icon(
+                          onPressed: loading
+                              ? null
+                              : () => setModalState(() => evidenceImage = null),
+                          icon: const Icon(
+                            Icons.delete_outline,
                             color: Colors.redAccent,
                             size: 18,
                           ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              modalError!,
-                              style: const TextStyle(
-                                color: Colors.redAccent,
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                              ),
+                          label: const Text(
+                            "Quitar foto",
+                            style: TextStyle(
+                              color: Colors.redAccent,
+                              fontSize: 12,
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-
-                  const SizedBox(height: 8),
-
-                  // Botón de activar
-                  SizedBox(
-                    width: double.infinity,
-                    height: 55,
-                    child: ElevatedButton.icon(
-                      onPressed: loading
-                          ? null
-                          : () async {
-                              final details = justificationCtrl.text.trim();
-                              if (emergencyType == null) {
-                                setModalState(() {
-                                  modalError =
-                                      'Selecciona el tipo de emergencia';
-                                });
-                                return;
-                              }
-                              if (emergencyType == 'Otro' && details.isEmpty) {
-                                setModalState(() {
-                                  modalError =
-                                      'Describe brevemente la emergencia';
-                                });
-                                return;
-                              }
-                              final justification = details.isEmpty
-                                  ? emergencyType!
-                                  : '${emergencyType!}: $details';
-
-                              setModalState(() {
-                                loading = true;
-                                modalError = null;
-                              });
-
-                              try {
-                                final result =
-                                    await EmergencyService.triggerEmergency(
-                                      justification: justification,
-                                      imageFile: evidenceImage,
-                                    );
-
-                                if (!ctx.mounted) return;
-                                Navigator.pop(ctx);
-
-                                // Mostrar confirmación
-                                _showEmergencySuccess(result);
-                              } catch (e) {
-                                setModalState(() {
-                                  loading = false;
-                                  modalError =
-                                      EmergencyService.userMessageForError(e);
-                                });
-                              }
-                            },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                        elevation: 4,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      icon: loading
-                          ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2.5,
+                    const SizedBox(height: 8),
+
+                    // ✅ Error de validación dentro del modal (no SnackBar)
+                    if (modalError != null)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: Colors.redAccent,
+                              size: 18,
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                modalError!,
+                                style: const TextStyle(
+                                  color: Colors.redAccent,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            )
-                          : const Icon(Icons.campaign_rounded, size: 24),
-                      label: Text(
-                        loading ? "Activando..." : "ACTIVAR ALARMA",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                    const SizedBox(height: 8),
+
+                    // Botón de activar
+                    SizedBox(
+                      width: double.infinity,
+                      height: 55,
+                      child: ElevatedButton.icon(
+                        onPressed: loading
+                            ? null
+                            : () async {
+                                final details = justificationCtrl.text.trim();
+                                if (emergencyType == null) {
+                                  setModalState(() {
+                                    modalError =
+                                        'Selecciona el tipo de emergencia';
+                                  });
+                                  return;
+                                }
+                                if (emergencyType == 'Otro' &&
+                                    details.isEmpty) {
+                                  setModalState(() {
+                                    modalError =
+                                        'Describe brevemente la emergencia';
+                                  });
+                                  return;
+                                }
+                                final justification = details.isEmpty
+                                    ? emergencyType!
+                                    : '${emergencyType!}: $details';
+
+                                setModalState(() {
+                                  loading = true;
+                                  modalError = null;
+                                });
+
+                                try {
+                                  final result =
+                                      await EmergencyService.triggerEmergency(
+                                        justification: justification,
+                                        imageFile: evidenceImage,
+                                      );
+
+                                  if (!ctx.mounted) return;
+                                  Navigator.pop(ctx);
+
+                                  // Mostrar confirmación
+                                  _showEmergencySuccess(result);
+                                } catch (e) {
+                                  setModalState(() {
+                                    loading = false;
+                                    modalError =
+                                        EmergencyService.userMessageForError(e);
+                                  });
+                                }
+                              },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.emergency,
+                          foregroundColor: Colors.white,
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        icon: loading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2.5,
+                                ),
+                              )
+                            : const Icon(Icons.campaign_rounded, size: 24),
+                        label: Text(
+                          loading ? "Activando..." : "ACTIVAR ALARMA",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
+                    const SizedBox(height: 12),
 
-                  // Botón cancelar
-                  TextButton(
-                    onPressed: loading ? null : () => Navigator.pop(ctx),
-                    child: const Text(
-                      "Cancelar",
-                      style: TextStyle(
-                        fontSize: 15,
-                        color: Colors.grey,
-                        fontWeight: FontWeight.w600,
+                    // Botón cancelar
+                    TextButton(
+                      onPressed: loading ? null : () => Navigator.pop(ctx),
+                      child: const Text(
+                        "Cancelar",
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: Colors.grey,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -637,22 +644,22 @@ class _HomePageState extends State<HomePage>
     required VoidCallback onTap,
   }) {
     return Card(
-      elevation: 4,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      elevation: 1.5,
+      shadowColor: Colors.black12,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(18),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: const Color(0xFF667EEA).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 36, color: const Color(0xFF667EEA)),
+              child: Icon(icon, size: 32, color: AppColors.primary),
             ),
             const SizedBox(height: 12),
             Padding(
@@ -661,7 +668,7 @@ class _HomePageState extends State<HomePage>
                 title,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 14,
                   fontWeight: FontWeight.bold,
                   color: Color(0xFF333333),
                 ),
@@ -682,57 +689,22 @@ class _HomePageState extends State<HomePage>
     final dashboardRatio = screenSize.width >= 720 ? 1.25 : 1.05;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Inicio',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      backgroundColor: const Color(0xFFF4F6F9),
+      appBar: const AppGradientAppBar(title: 'Inicio'),
+      backgroundColor: AppColors.background,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               if (!_online)
-                Semantics(
-                  liveRegion: true,
-                  child: Container(
-                    width: double.infinity,
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 10,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF7ED),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFF59E0B)),
-                    ),
-                    child: const Row(
-                      children: [
-                        Icon(Icons.wifi_off, color: Color(0xFFB45309)),
-                        SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Sin conexión. El SOS y los envíos estarán disponibles al recuperar internet.',
-                            style: TextStyle(
-                              color: Color(0xFF7C2D12),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 12),
+                  child: AppInlineMessage(
+                    icon: Icons.wifi_off_rounded,
+                    message:
+                        'Sin conexión. El SOS y los envíos se habilitarán al recuperar internet.',
+                    background: Color(0xFFFFF7ED),
+                    foreground: AppColors.warning,
                   ),
                 ),
               // ═══════════════════════════════════════

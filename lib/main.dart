@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -7,6 +8,7 @@ import 'firebase_options.dart';
 import 'core/auth/token_storage.dart';
 import 'core/auth/roles.dart';
 import 'core/navigation/app_navigator.dart';
+import 'core/theme/app_theme.dart';
 import 'pages/login/login_page.dart';
 import 'pages/home/home_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -37,22 +39,14 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: appNavigatorKey,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF667EEA),
-          primary: const Color(0xFF667EEA),
-          secondary: const Color(0xFF764BA2),
-          error: const Color(0xFFE53935),
-          surface: Colors.white,
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF4F6F9),
-        visualDensity: VisualDensity.standard,
-        materialTapTargetSize: MaterialTapTargetSize.padded,
-        inputDecorationTheme: const InputDecorationTheme(
-          floatingLabelBehavior: FloatingLabelBehavior.auto,
-        ),
-      ),
+      theme: AppTheme.light,
+      locale: const Locale('es'),
+      supportedLocales: const [Locale('es'), Locale('en')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const AuthGate(),
     );
   }

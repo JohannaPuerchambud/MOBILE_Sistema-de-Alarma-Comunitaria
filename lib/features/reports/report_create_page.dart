@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 import 'report_service.dart';
 
 class ReportCreatePage extends StatefulWidget {
@@ -138,35 +140,21 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "Nuevo Reporte",
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
+      appBar: const AppGradientAppBar(title: 'Nuevo reporte'),
       body: Container(
-        color: const Color(0xFFF4F6F9),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: SingleChildScrollView(
+        color: AppColors.background,
+        child: SingleChildScrollView(
+          child: AppResponsiveContent(
+            maxWidth: 720,
+            padding: const EdgeInsets.all(16),
             child: Card(
-              elevation: 4,
-              shadowColor: Colors.black26,
+              elevation: 1.5,
+              shadowColor: Colors.black12,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(18),
               ),
               child: Padding(
-                padding: const EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -181,24 +169,8 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _titleCtrl,
-                      decoration: InputDecoration(
-                        hintText: "Ej: Sospechoso / Ruido / Emergencia",
-                        filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF667EEA),
-                            width: 2,
-                          ),
-                        ),
+                      decoration: const InputDecoration(
+                        hintText: "Ej.: Sospechoso, ruido o emergencia",
                       ),
                       maxLength: 100,
                     ),
@@ -215,24 +187,8 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: _descCtrl,
-                      decoration: InputDecoration(
+                      decoration: const InputDecoration(
                         hintText: "Describe lo ocurrido detalladamente...",
-                        filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
-                            width: 1.5,
-                          ),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF667EEA),
-                            width: 2,
-                          ),
-                        ),
                       ),
                       maxLines: 4,
                     ),
@@ -247,47 +203,53 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    GestureDetector(
-                      // ✅ LLAMAMOS AL MENÚ PARA ELEGIR CÁMARA O GALERÍA
-                      onTap: loading ? null : _showImageSourceActionSheet,
-                      child: Container(
-                        height: 180,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
-                          border: Border.all(
-                            color: const Color(0xFFE0E0E0),
-                            width: 2,
-                            style: BorderStyle.solid,
+                    Semantics(
+                      button: true,
+                      label: _imageFile == null
+                          ? 'Adjuntar evidencia fotografica'
+                          : 'Cambiar evidencia fotografica',
+                      child: GestureDetector(
+                        // ✅ LLAMAMOS AL MENÚ PARA ELEGIR CÁMARA O GALERÍA
+                        onTap: loading ? null : _showImageSourceActionSheet,
+                        child: Container(
+                          height: 156,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF8F9FA),
+                            border: Border.all(
+                              color: const Color(0xFFE0E0E0),
+                              width: 2,
+                              style: BorderStyle.solid,
+                            ),
+                            borderRadius: BorderRadius.circular(15),
                           ),
-                          borderRadius: BorderRadius.circular(15),
-                        ),
-                        child: _imageFile != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(13),
-                                child: Image.file(
-                                  _imageFile!,
-                                  fit: BoxFit.cover,
-                                ),
-                              )
-                            : const Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.add_a_photo_outlined,
-                                    size: 50,
-                                    color: Color(0xFF999999),
+                          child: _imageFile != null
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(13),
+                                  child: Image.file(
+                                    _imageFile!,
+                                    fit: BoxFit.cover,
                                   ),
-                                  SizedBox(height: 12),
-                                  Text(
-                                    "Toca para tomar o subir una foto",
-                                    style: TextStyle(
-                                      color: Color(0xFF777777),
-                                      fontWeight: FontWeight.w500,
+                                )
+                              : const Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.add_a_photo_outlined,
+                                      size: 50,
+                                      color: Color(0xFF999999),
                                     ),
-                                  ),
-                                ],
-                              ),
+                                    SizedBox(height: 12),
+                                    Text(
+                                      "Toca para tomar o subir una foto",
+                                      style: TextStyle(
+                                        color: Color(0xFF777777),
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
                       ),
                     ),
                     if (_imageFile != null)
@@ -311,54 +273,19 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
 
                     if (error != null)
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Text(
-                          error!,
-                          style: const TextStyle(
-                            color: Colors.redAccent,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: AppInlineMessage(
+                          icon: Icons.error_outline_rounded,
+                          message: error!,
+                          background: const Color(0xFFFFE8E8),
+                          foreground: AppColors.emergency,
                         ),
                       ),
-
-                    SizedBox(
-                      width: double.infinity,
-                      height: 55,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-                          ),
-                        ),
-                        child: ElevatedButton(
-                          onPressed: loading ? null : _submit,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.transparent,
-                            shadowColor: Colors.transparent,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: loading
-                              ? const SizedBox(
-                                  height: 24,
-                                  width: 24,
-                                  child: CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2.5,
-                                  ),
-                                )
-                              : const Text(
-                                  "Enviar Reporte",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
+                    AppGradientButton(
+                      label: 'Enviar reporte',
+                      icon: Icons.send_rounded,
+                      loading: loading,
+                      onPressed: loading ? null : _submit,
                     ),
                   ],
                 ),

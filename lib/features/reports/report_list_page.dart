@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 
 import 'report_model.dart';
 import 'report_service.dart';
@@ -89,7 +91,7 @@ class _ReportListPageState extends State<ReportListPage> {
   }
 
   Color _activityColor(NeighborhoodActivity item) {
-    return item.isEmergency ? const Color(0xFFE5484D) : const Color(0xFFF59E0B);
+    return item.isEmergency ? AppColors.emergency : AppColors.report;
   }
 
   IconData _activityIcon(NeighborhoodActivity item) {
@@ -182,7 +184,7 @@ class _ReportListPageState extends State<ReportListPage> {
       backgroundColor: Colors.transparent,
       builder: (sheetContext) {
         return DraggableScrollableSheet(
-          initialChildSize: 0.82,
+          initialChildSize: item.hasImage ? 0.82 : 0.64,
           minChildSize: 0.52,
           maxChildSize: 0.95,
           expand: false,
@@ -396,179 +398,184 @@ class _ReportListPageState extends State<ReportListPage> {
   Widget _buildActivityCard(NeighborhoodActivity item) {
     final color = _activityColor(item);
 
-    return Card(
-      elevation: 1.5,
-      shadowColor: Colors.black12,
-      margin: EdgeInsets.zero,
-      clipBehavior: Clip.antiAlias,
-      color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-        side: const BorderSide(color: Color(0xFFEAECF0)),
-      ),
-      child: InkWell(
-        onTap: () => _showActivityDetail(item),
-        child: IntrinsicHeight(
-          child: Row(
-            children: [
-              Container(width: 5, color: color),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(14),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (item.hasImage) ...[
-                        Hero(
-                          tag: 'activity-image-${item.activityId}',
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              item.imageUrl!,
-                              width: 92,
-                              height: 92,
-                              fit: BoxFit.cover,
-                              loadingBuilder: (context, child, progress) {
-                                if (progress == null) return child;
-                                return Container(
+    return Semantics(
+      button: true,
+      label:
+          'Abrir detalle de ${item.isEmergency ? 'emergencia' : 'reporte'}: ${item.title}',
+      child: Card(
+        elevation: 1.5,
+        shadowColor: Colors.black12,
+        margin: EdgeInsets.zero,
+        clipBehavior: Clip.antiAlias,
+        color: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(18),
+          side: const BorderSide(color: Color(0xFFEAECF0)),
+        ),
+        child: InkWell(
+          onTap: () => _showActivityDetail(item),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Container(width: 5, color: color),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(14),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (item.hasImage) ...[
+                          Hero(
+                            tag: 'activity-image-${item.activityId}',
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Image.network(
+                                item.imageUrl!,
+                                width: 92,
+                                height: 92,
+                                fit: BoxFit.cover,
+                                loadingBuilder: (context, child, progress) {
+                                  if (progress == null) return child;
+                                  return Container(
+                                    width: 92,
+                                    height: 92,
+                                    color: Colors.grey.shade100,
+                                    child: Center(
+                                      child: SizedBox(
+                                        width: 22,
+                                        height: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: color,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                errorBuilder: (_, _, _) => Container(
                                   width: 92,
                                   height: 92,
                                   color: Colors.grey.shade100,
-                                  child: Center(
-                                    child: SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2,
+                                  child: const Icon(
+                                    Icons.broken_image_outlined,
+                                    color: Colors.grey,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 13),
+                        ] else ...[
+                          Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: color.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(13),
+                            ),
+                            child: Icon(
+                              _activityIcon(item),
+                              color: color,
+                              size: 27,
+                            ),
+                          ),
+                          const SizedBox(width: 13),
+                        ],
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                      vertical: 4,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: color.withValues(alpha: 0.1),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      _activityLabel(item),
+                                      style: TextStyle(
                                         color: color,
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w800,
+                                        letterSpacing: 0.5,
                                       ),
                                     ),
                                   ),
-                                );
-                              },
-                              errorBuilder: (_, _, _) => Container(
-                                width: 92,
-                                height: 92,
-                                color: Colors.grey.shade100,
-                                child: const Icon(
-                                  Icons.broken_image_outlined,
-                                  color: Colors.grey,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 13),
-                      ] else ...[
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: color.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(13),
-                          ),
-                          child: Icon(
-                            _activityIcon(item),
-                            color: color,
-                            size: 27,
-                          ),
-                        ),
-                        const SizedBox(width: 13),
-                      ],
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: color.withValues(alpha: 0.1),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    _activityLabel(item),
-                                    style: TextStyle(
-                                      color: color,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.w800,
-                                      letterSpacing: 0.5,
-                                    ),
-                                  ),
-                                ),
-                                const Spacer(),
-                                Text(
-                                  _formatDate(item.createdAt),
-                                  style: const TextStyle(
-                                    color: Color(0xFF98A2B3),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              item.title,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFF1D2939),
-                                fontSize: 16,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              item.description,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Color(0xFF667085),
-                                fontSize: 13,
-                                height: 1.3,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.person_outline,
-                                  size: 15,
-                                  color: Color(0xFF98A2B3),
-                                ),
-                                const SizedBox(width: 5),
-                                Expanded(
-                                  child: Text(
-                                    item.authorName,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
+                                  const Spacer(),
+                                  Text(
+                                    _formatDate(item.createdAt),
                                     style: const TextStyle(
-                                      color: Color(0xFF667085),
-                                      fontSize: 11,
+                                      color: Color(0xFF98A2B3),
+                                      fontSize: 12,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                item.title,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF1D2939),
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w800,
                                 ),
-                                const Icon(
-                                  Icons.chevron_right_rounded,
-                                  color: Color(0xFF98A2B3),
-                                  size: 20,
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.description,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: Color(0xFF667085),
+                                  fontSize: 13,
+                                  height: 1.3,
                                 ),
-                              ],
-                            ),
-                          ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(
+                                    Icons.person_outline,
+                                    size: 15,
+                                    color: Color(0xFF98A2B3),
+                                  ),
+                                  const SizedBox(width: 5),
+                                  Expanded(
+                                    child: Text(
+                                      item.authorName,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: Color(0xFF667085),
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.chevron_right_rounded,
+                                    color: Color(0xFF98A2B3),
+                                    size: 20,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -614,23 +621,8 @@ class _ReportListPageState extends State<ReportListPage> {
     final visibleActivity = filteredActivity;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Actividad del barrio',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-      ),
-      backgroundColor: const Color(0xFFF4F6F9),
+      appBar: const AppGradientAppBar(title: 'Actividad del barrio'),
+      backgroundColor: AppColors.background,
       body: Column(
         children: [
           Container(
@@ -662,35 +654,13 @@ class _ReportListPageState extends State<ReportListPage> {
                     child: CircularProgressIndicator(color: Color(0xFF667EEA)),
                   )
                 : error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.cloud_off_outlined,
-                            color: Colors.redAccent,
-                            size: 52,
-                          ),
-                          const SizedBox(height: 14),
-                          Text(
-                            error!,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              color: Color(0xFF667085),
-                              fontSize: 15,
-                            ),
-                          ),
-                          const SizedBox(height: 16),
-                          FilledButton.icon(
-                            onPressed: _load,
-                            icon: const Icon(Icons.refresh_rounded),
-                            label: const Text('Reintentar'),
-                          ),
-                        ],
-                      ),
-                    ),
+                ? AppStatusView(
+                    icon: Icons.cloud_off_outlined,
+                    title: 'No se pudo cargar la actividad',
+                    message: error!,
+                    actionLabel: 'Reintentar',
+                    onAction: _load,
+                    color: AppColors.emergency,
                   )
                 : RefreshIndicator(
                     color: const Color(0xFF667EEA),

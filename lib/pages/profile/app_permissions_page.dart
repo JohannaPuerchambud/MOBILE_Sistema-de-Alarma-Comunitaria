@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 
 import '../../core/permissions/app_permissions.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/widgets/app_widgets.dart';
 
 class AppPermissionsPage extends StatefulWidget {
   const AppPermissionsPage({super.key});
@@ -183,69 +185,59 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
     final permissions = _permissions;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'Permisos',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
+      appBar: const AppGradientAppBar(title: 'Permisos'),
+      backgroundColor: AppColors.background,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 680),
+          child: RefreshIndicator(
+            onRefresh: _refreshPermissions,
+            child: ListView(
+              padding: const EdgeInsets.all(20),
+              children: [
+                if (_loading)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 48),
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                else if (permissions != null) ...[
+                  _sectionTitle('Esenciales'),
+                  _permissionGroup([
+                    _permissionRow(
+                      icon: Icons.notifications_active_outlined,
+                      title: 'Notificaciones',
+                      description:
+                          'Permiten recibir mensajes, reportes y emergencias del barrio, incluso cuando la aplicación está en segundo plano.',
+                      granted: permissions.notificationsAllowed,
+                      onRequest: AppPermissions.requestNotifications,
+                    ),
+                  ]),
+                  _sectionTitle('Evidencias'),
+                  _permissionGroup([
+                    _permissionRow(
+                      icon: Icons.camera_alt_outlined,
+                      title: 'Cámara',
+                      description:
+                          'Se utiliza únicamente cuando decides tomar una fotografía para adjuntarla como evidencia.',
+                      granted: permissions.cameraAllowed,
+                      onRequest: AppPermissions.requestCamera,
+                    ),
+                    _permissionRow(
+                      icon: Icons.photo_library_outlined,
+                      title: 'Galería',
+                      description: Platform.isIOS
+                          ? 'Permite elegir una fotografía existente para adjuntarla como evidencia.'
+                          : 'Android utiliza el selector privado del sistema, por lo que la aplicación no recibe acceso completo a tu galería.',
+                      granted: permissions.galleryAllowed,
+                      onRequest: Platform.isIOS
+                          ? AppPermissions.requestPhotos
+                          : null,
+                    ),
+                  ]),
+                ],
+              ],
             ),
           ),
-        ),
-      ),
-      backgroundColor: const Color(0xFFF4F6F9),
-      body: RefreshIndicator(
-        onRefresh: _refreshPermissions,
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            if (_loading)
-              const Padding(
-                padding: EdgeInsets.only(top: 48),
-                child: Center(child: CircularProgressIndicator()),
-              )
-            else if (permissions != null) ...[
-              _sectionTitle('Esenciales'),
-              _permissionGroup([
-                _permissionRow(
-                  icon: Icons.notifications_active_outlined,
-                  title: 'Notificaciones',
-                  description:
-                      'Permiten recibir mensajes, reportes y emergencias del barrio, incluso cuando la aplicación está en segundo plano.',
-                  granted: permissions.notificationsAllowed,
-                  onRequest: AppPermissions.requestNotifications,
-                ),
-              ]),
-              _sectionTitle('Evidencias'),
-              _permissionGroup([
-                _permissionRow(
-                  icon: Icons.camera_alt_outlined,
-                  title: 'Cámara',
-                  description:
-                      'Se utiliza únicamente cuando decides tomar una fotografía para adjuntarla como evidencia.',
-                  granted: permissions.cameraAllowed,
-                  onRequest: AppPermissions.requestCamera,
-                ),
-                _permissionRow(
-                  icon: Icons.photo_library_outlined,
-                  title: 'Galería',
-                  description: Platform.isIOS
-                      ? 'Permite elegir una fotografía existente para adjuntarla como evidencia.'
-                      : 'Android utiliza el selector privado del sistema, por lo que la aplicación no recibe acceso completo a tu galería.',
-                  granted: permissions.galleryAllowed,
-                  onRequest: Platform.isIOS
-                      ? AppPermissions.requestPhotos
-                      : null,
-                ),
-              ]),
-            ],
-          ],
         ),
       ),
     );
