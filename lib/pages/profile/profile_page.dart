@@ -1,11 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../core/auth/token_storage.dart';
 import '../../core/auth/roles.dart';
 import '../../core/config/fcm_service.dart';
+import '../../core/permissions/app_permissions.dart';
+import 'app_permissions_page.dart';
 import '../login/login_page.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -24,9 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String userPhone = "No disponible";
   String userAddress = "No disponible";
   String userNeighborhood = "Tu Barrio";
-  AuthorizationStatus? _notificationStatus;
-  PermissionStatus? _cameraStatus;
-  PermissionStatus? _photosStatus;
+  AppPermissionsSnapshot? _permissions;
   bool _checkingPermissions = true;
 
   @override
@@ -54,95 +51,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _refreshPermissions() async {
-    final notificationSettings = await FirebaseMessaging.instance
-        .getNotificationSettings();
-    final cameraStatus = await Permission.camera.status;
-    final photosStatus = Platform.isIOS
-        ? await Permission.photos.status
-        : PermissionStatus.granted;
-
+    final snapshot = await AppPermissions.load();
     if (!mounted) return;
     setState(() {
-      _notificationStatus = notificationSettings.authorizationStatus;
-      _cameraStatus = cameraStatus;
-      _photosStatus = photosStatus;
+      _permissions = snapshot;
       _checkingPermissions = false;
     });
   }
 
-  Future<void> _requestNotifications() async {
-    final settings = await FirebaseMessaging.instance.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
+  Future<void> _openPermissions() async {
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const AppPermissionsPage()),
     );
     if (!mounted) return;
-    setState(() => _notificationStatus = settings.authorizationStatus);
-  }
-
-  Future<void> _requestCamera() async {
-    final current = await Permission.camera.status;
-    if (current.isPermanentlyDenied || current.isRestricted) {
-      await openAppSettings();
-      return;
-    }
-    await Permission.camera.request();
     await _refreshPermissions();
-  }
-
-  Future<void> _requestPhotos() async {
-    if (!Platform.isIOS) return;
-    final current = await Permission.photos.status;
-    if (current.isPermanentlyDenied || current.isRestricted) {
-      await openAppSettings();
-      return;
-    }
-    await Permission.photos.request();
-    await _refreshPermissions();
-  }
-
-  bool get _notificationsAllowed =>
-      _notificationStatus == AuthorizationStatus.authorized ||
-      _notificationStatus == AuthorizationStatus.provisional;
-
-  String _permissionLabel(bool granted) =>
-      granted ? 'Permitido' : 'Requiere permiso';
-
-  Widget _buildPermissionRow({
-    required IconData icon,
-    required String title,
-    required String description,
-    required bool granted,
-    required VoidCallback? onPressed,
-  }) {
-    final color = granted ? const Color(0xFF15803D) : const Color(0xFFB45309);
-    return Semantics(
-      label: '$title. ${_permissionLabel(granted)}. $description',
-      button: onPressed != null,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: color.withValues(alpha: 0.12),
-          child: Icon(icon, color: color),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(description),
-            const SizedBox(height: 4),
-            Text(
-              _permissionLabel(granted),
-              style: TextStyle(color: color, fontWeight: FontWeight.w700),
-            ),
-          ],
-        ),
-        trailing: granted || onPressed == null
-            ? Icon(Icons.check_circle, color: color)
-            : TextButton(onPressed: onPressed, child: const Text('Permitir')),
-        onTap: granted ? null : onPressed,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-      ),
-    );
   }
 
   Future<void> logout(BuildContext context) async {
@@ -284,85 +207,84 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
               ),
 
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Semantics(
-                  header: true,
-                  child: const Text(
-                    'Permisos de la aplicación',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF333333),
+              const SizedBox(height: 20),
+              Semantics(
+                button: true,
+                label: _checkingPermissions
+                    ? 'Permisos de la aplicación. Revisando estado.'
+                    : 'Permisos de la aplicación. ${_permissions?.grantedCount ?? 0} de ${AppPermissionsSnapshot.totalCount} habilitados. Administrar permisos.',
+                child: Card(
+                  margin: EdgeInsets.zero,
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
+                    onTap: _openPermissions,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 48,
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF667EEA,
+                              ).withValues(alpha: 0.10),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.admin_panel_settings_outlined,
+                              color: Color(0xFF667EEA),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Permisos de la aplicación',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF333333),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  _checkingPermissions
+                                      ? 'Revisando permisos...'
+                                      : '${_permissions?.grantedCount ?? 0} de ${AppPermissionsSnapshot.totalCount} habilitados',
+                                  style: const TextStyle(
+                                    color: Color(0xFF667EEA),
+                                    fontWeight: FontWeight.w700,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Notificaciones, cámara y galería',
+                                  style: TextStyle(
+                                    color: Color(0xFF616161),
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const Icon(
+                            Icons.chevron_right,
+                            color: Color(0xFF667EEA),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: 6),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Estos permisos permiten recibir alertas y adjuntar evidencia. La app no solicita tu ubicación actual.',
-                  style: TextStyle(color: Color(0xFF616161), height: 1.4),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
-                ),
-                child: _checkingPermissions
-                    ? const Padding(
-                        padding: EdgeInsets.all(24),
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    : Column(
-                        children: [
-                          _buildPermissionRow(
-                            icon: Icons.notifications_active_outlined,
-                            title: 'Notificaciones',
-                            description:
-                                'Necesarias para recibir mensajes, reportes y emergencias del barrio.',
-                            granted: _notificationsAllowed,
-                            onPressed: _notificationsAllowed
-                                ? null
-                                : _requestNotifications,
-                          ),
-                          const Divider(height: 1),
-                          _buildPermissionRow(
-                            icon: Icons.camera_alt_outlined,
-                            title: 'Cámara',
-                            description:
-                                'Opcional. Se usa para fotografiar evidencia.',
-                            granted: _cameraStatus?.isGranted ?? false,
-                            onPressed: _cameraStatus?.isGranted == true
-                                ? null
-                                : _requestCamera,
-                          ),
-                          const Divider(height: 1),
-                          _buildPermissionRow(
-                            icon: Icons.photo_library_outlined,
-                            title: 'Galería',
-                            description: Platform.isIOS
-                                ? 'Opcional. Permite elegir evidencia guardada.'
-                                : 'Android utiliza el selector privado del sistema sin dar acceso completo.',
-                            granted:
-                                Platform.isAndroid ||
-                                _photosStatus?.isGranted == true ||
-                                _photosStatus?.isLimited == true,
-                            onPressed:
-                                Platform.isIOS &&
-                                    _photosStatus?.isGranted != true &&
-                                    _photosStatus?.isLimited != true
-                                ? _requestPhotos
-                                : null,
-                          ),
-                        ],
-                      ),
-              ),
-              const SizedBox(height: 24),
-              const SizedBox(height: 40),
+              const SizedBox(height: 28),
 
               SizedBox(
                 width: double.infinity,
