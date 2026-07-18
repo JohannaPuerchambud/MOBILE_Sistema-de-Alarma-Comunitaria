@@ -181,8 +181,6 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
   @override
   Widget build(BuildContext context) {
     final permissions = _permissions;
-    final grantedCount = permissions?.grantedCount ?? 0;
-    final progress = grantedCount / AppPermissionsSnapshot.totalCount;
 
     return Scaffold(
       appBar: AppBar(
@@ -207,52 +205,12 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            Card(
-              margin: EdgeInsets.zero,
-              elevation: 3,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(18),
-                child: _loading
-                    ? const Center(child: CircularProgressIndicator())
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '$grantedCount de ${AppPermissionsSnapshot.totalCount} habilitados',
-                            style: const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.w800,
-                              color: Color(0xFF333333),
-                            ),
-                          ),
-                          const SizedBox(height: 10),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: progress,
-                              minHeight: 8,
-                              backgroundColor: const Color(0xFFE7EAF8),
-                              color: progress == 1
-                                  ? const Color(0xFF15803D)
-                                  : const Color(0xFF667EEA),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          const Text(
-                            'La aplicación solo solicita lo necesario para recibir alertas y adjuntar evidencia. No usa tu ubicación actual.',
-                            style: TextStyle(
-                              color: Color(0xFF616161),
-                              height: 1.4,
-                            ),
-                          ),
-                        ],
-                      ),
-              ),
-            ),
-            if (!_loading && permissions != null) ...[
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: Center(child: CircularProgressIndicator()),
+              )
+            else if (permissions != null) ...[
               _sectionTitle('Esenciales'),
               _permissionGroup([
                 _permissionRow(
