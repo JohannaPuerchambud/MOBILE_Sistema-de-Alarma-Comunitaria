@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_theme.dart';
 
@@ -22,10 +23,22 @@ class AppGradientAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
+      backgroundColor: AppColors.primary,
+      foregroundColor: Colors.white,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      systemOverlayStyle: const SystemUiOverlayStyle(
+        statusBarColor: AppColors.primary,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
       actions: actions,
       bottom: bottom,
-      flexibleSpace: const DecoratedBox(
-        decoration: BoxDecoration(gradient: AppTheme.brandGradient),
+      flexibleSpace: const SizedBox.expand(
+        child: DecoratedBox(
+          decoration: BoxDecoration(gradient: AppTheme.brandGradient),
+        ),
       ),
     );
   }

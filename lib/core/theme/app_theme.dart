@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 abstract final class AppColors {
   static const primary = Color(0xFF667EEA);
+  static const messageSent = Color(0xFF5368A6);
   static const secondary = Color(0xFF764BA2);
   static const emergency = Color(0xFFD32F2F);
   static const emergencyLight = Color(0xFFFF5252);
@@ -77,7 +78,7 @@ abstract final class AppTheme {
       appBarTheme: const AppBarTheme(
         elevation: 0,
         foregroundColor: Colors.white,
-        backgroundColor: Colors.transparent,
+        backgroundColor: AppColors.primary,
         surfaceTintColor: Colors.transparent,
         titleTextStyle: TextStyle(
           color: Colors.white,

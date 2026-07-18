@@ -698,14 +698,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                 ),
                                 decoration: BoxDecoration(
                                   color: isMine
-                                      ? const Color(0xFF667EEA)
+                                      ? AppColors.messageSent
                                       : Colors.white,
-                                  border: _isEmergencyMessage(m.message)
-                                      ? Border.all(
-                                          color: AppColors.emergency,
-                                          width: 2,
-                                        )
-                                      : null,
+                                  border: isMine
+                                      ? null
+                                      : Border.all(color: AppColors.border),
                                   // ✅ Ajustamos los bordes si está agrupado
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(16),
