@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 
 import 'core/auth/token_storage.dart';
 import 'core/auth/roles.dart';
+import 'core/navigation/app_navigator.dart';
 import 'pages/login/login_page.dart';
 import 'pages/home/home_page.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -17,9 +18,6 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     "💌 Notificación con app cerrada recibida: ${message.notification?.title}",
   );
 }
-
-// ✅ Clave global del Navigator para mostrar SnackBars desde FCM
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,7 +36,23 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigatorKey,
+      navigatorKey: appNavigatorKey,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF667EEA),
+          primary: const Color(0xFF667EEA),
+          secondary: const Color(0xFF764BA2),
+          error: const Color(0xFFE53935),
+          surface: Colors.white,
+        ),
+        scaffoldBackgroundColor: const Color(0xFFF4F6F9),
+        visualDensity: VisualDensity.standard,
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        inputDecorationTheme: const InputDecorationTheme(
+          floatingLabelBehavior: FloatingLabelBehavior.auto,
+        ),
+      ),
       home: const AuthGate(),
     );
   }

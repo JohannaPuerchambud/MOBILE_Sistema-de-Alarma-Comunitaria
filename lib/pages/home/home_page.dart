@@ -1,13 +1,15 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../core/config/fcm_service.dart';
+import '../../core/config/connectivity_service.dart';
 import '../../features/reports/report_list_page.dart';
 import '../../features/reports/report_create_page.dart';
 import '../../features/chat/chat_page.dart';
 import '../../features/emergency/emergency_service.dart';
 import '../profile/profile_page.dart';
-import '../../main.dart' show navigatorKey;
+import '../../core/navigation/app_navigator.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -20,11 +22,20 @@ class _HomePageState extends State<HomePage>
     with SingleTickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
+  StreamSubscription<bool>? _connectivitySubscription;
+  bool _online = true;
 
   @override
   void initState() {
     super.initState();
-    PushNotificationService.init(navKey: navigatorKey);
+    PushNotificationService.init(navKey: appNavigatorKey);
+    _connectivitySubscription = ConnectivityService.instance.connectionChanges
+        .listen((connected) {
+          if (mounted) setState(() => _online = connected);
+        });
+    ConnectivityService.instance.hasNetworkRoute().then((connected) {
+      if (mounted) setState(() => _online = connected);
+    });
 
     // Animación de pulso para el botón de emergencia
     _pulseController = AnimationController(
@@ -39,6 +50,7 @@ class _HomePageState extends State<HomePage>
 
   @override
   void dispose() {
+    _connectivitySubscription?.cancel();
     _pulseController.dispose();
     super.dispose();
   }
@@ -50,6 +62,14 @@ class _HomePageState extends State<HomePage>
     bool loading = false;
     String? modalError;
     File? evidenceImage;
+    String? emergencyType;
+    const emergencyTypes = [
+      'Robo',
+      'Incendio',
+      'Accidente',
+      'Emergencia médica',
+      'Otro',
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -112,13 +132,56 @@ class _HomePageState extends State<HomePage>
                   ),
                   const SizedBox(height: 20),
 
+                  const Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      'Tipo de emergencia',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF333333),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: emergencyTypes
+                          .map(
+                            (type) => ChoiceChip(
+                              label: Text(type),
+                              selected: emergencyType == type,
+                              onSelected: loading
+                                  ? null
+                                  : (_) => setModalState(() {
+                                      emergencyType = type;
+                                      modalError = null;
+                                    }),
+                              selectedColor: Colors.redAccent.withValues(
+                                alpha: 0.16,
+                              ),
+                              side: BorderSide(
+                                color: emergencyType == type
+                                    ? Colors.redAccent
+                                    : const Color(0xFFD1D5DB),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   // Campo de justificación
                   TextField(
                     controller: justificationCtrl,
                     maxLines: 3,
                     maxLength: 200,
                     decoration: InputDecoration(
-                      hintText: "¿Por qué estás activando la alarma?",
+                      hintText: emergencyType == 'Otro'
+                          ? 'Describe brevemente la emergencia'
+                          : 'Detalle adicional (opcional)',
                       hintStyle: const TextStyle(color: Colors.grey),
                       filled: true,
                       fillColor: const Color(0xFFF8F9FA),
@@ -319,15 +382,24 @@ class _HomePageState extends State<HomePage>
                       onPressed: loading
                           ? null
                           : () async {
-                              final justification = justificationCtrl.text
-                                  .trim();
-                              if (justification.isEmpty) {
+                              final details = justificationCtrl.text.trim();
+                              if (emergencyType == null) {
                                 setModalState(() {
                                   modalError =
-                                      "Escribe el motivo de la emergencia";
+                                      'Selecciona el tipo de emergencia';
                                 });
                                 return;
                               }
+                              if (emergencyType == 'Otro' && details.isEmpty) {
+                                setModalState(() {
+                                  modalError =
+                                      'Describe brevemente la emergencia';
+                                });
+                                return;
+                              }
+                              final justification = details.isEmpty
+                                  ? emergencyType!
+                                  : '${emergencyType!}: $details';
 
                               setModalState(() {
                                 loading = true;
@@ -349,10 +421,8 @@ class _HomePageState extends State<HomePage>
                               } catch (e) {
                                 setModalState(() {
                                   loading = false;
-                                  modalError = e.toString().replaceFirst(
-                                    "Exception: ",
-                                    "",
-                                  );
+                                  modalError =
+                                      EmergencyService.userMessageForError(e);
                                 });
                               }
                             },
@@ -406,12 +476,62 @@ class _HomePageState extends State<HomePage>
     );
   }
 
+  Widget _deliveryChannelRow({
+    required IconData icon,
+    required String title,
+    required String message,
+    required Color color,
+  }) {
+    return Semantics(
+      label: '$title. $message',
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(fontWeight: FontWeight.w800),
+                  ),
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      color: Color(0xFF616161),
+                      height: 1.35,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   void _showEmergencySuccess(EmergencyResult result) {
+    final pushDelivered =
+        result.pushStatus == 'sent' || result.pushStatus == 'partially_sent';
+    final sirenActivated = const {
+      'queued',
+      'ringing',
+      'in-progress',
+      'completed',
+    }.contains(result.twilioStatus);
+    final evidenceAttached = result.evidenceStatus == 'uploaded';
+
     showDialog(
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        scrollable: true,
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -433,24 +553,79 @@ class _HomePageState extends State<HomePage>
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text(
-              result.userMessage,
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
+            const Divider(height: 24),
+            _deliveryChannelRow(
+              icon: Icons.check_circle_outline,
+              title: 'Registro',
+              message: 'La emergencia quedó registrada en el barrio.',
+              color: const Color(0xFF15803D),
+            ),
+            _deliveryChannelRow(
+              icon: pushDelivered
+                  ? Icons.notifications_active_outlined
+                  : Icons.notifications_off_outlined,
+              title: 'Notificaciones a vecinos',
+              message: result.pushMessage,
+              color: pushDelivered
+                  ? const Color(0xFF15803D)
+                  : const Color(0xFFB45309),
+            ),
+            _deliveryChannelRow(
+              icon: sirenActivated
+                  ? Icons.volume_up_outlined
+                  : Icons.volume_off_outlined,
+              title: 'Sirena del barrio',
+              message: result.sirenMessage,
+              color: sirenActivated
+                  ? const Color(0xFF15803D)
+                  : const Color(0xFFB45309),
+            ),
+            _deliveryChannelRow(
+              icon: evidenceAttached
+                  ? Icons.image_outlined
+                  : Icons.hide_image_outlined,
+              title: 'Evidencia',
+              message: result.evidenceMessage.isEmpty
+                  ? 'No se adjuntó evidencia fotográfica.'
+                  : result.evidenceMessage,
+              color: evidenceAttached
+                  ? const Color(0xFF15803D)
+                  : const Color(0xFF64748B),
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              "Aceptar",
-              style: TextStyle(
-                color: Color(0xFF667EEA),
-                fontWeight: FontWeight.bold,
-              ),
-            ),
+            child: const Text('Cerrar'),
           ),
+          OutlinedButton.icon(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ChatPage()),
+              );
+            },
+            icon: const Icon(Icons.forum_outlined),
+            label: const Text('Ir al chat'),
+          ),
+          if (result.messageId != null)
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.pop(ctx);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => ReportListPage(
+                      initialActivityId: 'emergency-${result.messageId}',
+                    ),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.visibility_outlined),
+              label: const Text('Ver detalle'),
+            ),
         ],
       ),
     );
@@ -500,6 +675,12 @@ class _HomePageState extends State<HomePage>
 
   @override
   Widget build(BuildContext context) {
+    final screenSize = MediaQuery.sizeOf(context);
+    final compactHeight = screenSize.height < 700;
+    final sosSize = compactHeight ? 124.0 : 150.0;
+    final dashboardColumns = screenSize.width >= 720 ? 4 : 2;
+    final dashboardRatio = screenSize.width >= 720 ? 1.25 : 1.05;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -522,6 +703,38 @@ class _HomePageState extends State<HomePage>
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
+              if (!_online)
+                Semantics(
+                  liveRegion: true,
+                  child: Container(
+                    width: double.infinity,
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF7ED),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFF59E0B)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(Icons.wifi_off, color: Color(0xFFB45309)),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            'Sin conexión. El SOS y los envíos estarán disponibles al recuperar internet.',
+                            style: TextStyle(
+                              color: Color(0xFF7C2D12),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               // ═══════════════════════════════════════
               // ✅ BOTÓN GIGANTE DE EMERGENCIA (Tarea 2.1)
               // ═══════════════════════════════════════
@@ -544,46 +757,63 @@ class _HomePageState extends State<HomePage>
               // Botón con animación de pulso
               ScaleTransition(
                 scale: _pulseAnimation,
-                child: GestureDetector(
-                  onTap: _showEmergencyConfirmation,
-                  child: Container(
-                    width: 150,
-                    height: 150,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: const RadialGradient(
-                        colors: [Color(0xFFFF5252), Color(0xFFD32F2F)],
-                        center: Alignment.center,
-                        radius: 0.8,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.redAccent.withValues(alpha: 0.4),
-                          blurRadius: 24,
-                          spreadRadius: 4,
-                          offset: const Offset(0, 6),
+                child: Semantics(
+                  button: true,
+                  enabled: _online,
+                  label: 'Activar emergencia',
+                  hint:
+                      'Abre la confirmación antes de enviar la alerta al barrio',
+                  child: GestureDetector(
+                    onTap: _online
+                        ? _showEmergencyConfirmation
+                        : () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'Necesitas internet para enviar una emergencia.',
+                                ),
+                              ),
+                            );
+                          },
+                    child: Container(
+                      width: sosSize,
+                      height: sosSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const RadialGradient(
+                          colors: [Color(0xFFFF5252), Color(0xFFD32F2F)],
+                          center: Alignment.center,
+                          radius: 0.8,
                         ),
-                      ],
-                    ),
-                    child: const Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.campaign_rounded,
-                          size: 50,
-                          color: Colors.white,
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "SOS",
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.w900,
-                            color: Colors.white,
-                            letterSpacing: 3,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.redAccent.withValues(alpha: 0.4),
+                            blurRadius: 24,
+                            spreadRadius: 4,
+                            offset: const Offset(0, 6),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                      child: const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.campaign_rounded,
+                            size: 50,
+                            color: Colors.white,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            "SOS",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                              letterSpacing: 3,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -609,10 +839,10 @@ class _HomePageState extends State<HomePage>
 
               Expanded(
                 child: GridView.count(
-                  crossAxisCount: 2,
+                  crossAxisCount: dashboardColumns,
                   crossAxisSpacing: 16,
                   mainAxisSpacing: 16,
-                  childAspectRatio: 1.05,
+                  childAspectRatio: dashboardRatio,
                   children: [
                     _buildDashboardCard(
                       title: "Mi Perfil",
@@ -633,7 +863,7 @@ class _HomePageState extends State<HomePage>
                       ),
                     ),
                     _buildDashboardCard(
-                      title: "Ver Reportes",
+                      title: "Actividad del Barrio",
                       icon: Icons.list_alt_rounded,
                       onTap: () => Navigator.push(
                         context,

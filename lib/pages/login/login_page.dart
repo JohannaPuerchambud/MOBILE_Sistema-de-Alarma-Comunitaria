@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
 import '../../core/auth/auth_service.dart';
@@ -19,11 +20,44 @@ class _LoginPageState extends State<LoginPage> {
   final _storage = TokenStorage();
 
   bool loading = false;
+  String? _statusMessage;
+  Timer? _serverTimer;
   bool _obscureText = true;
+
+  @override
+  void dispose() {
+    _serverTimer?.cancel();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
 
   Future<void> login() async {
     FocusScope.of(context).unfocus();
-    setState(() => loading = true);
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Ingresa tu correo y contraseña.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      loading = true;
+      _statusMessage = null;
+    });
+    _serverTimer?.cancel();
+    _serverTimer = Timer(const Duration(seconds: 4), () {
+      if (!mounted || !loading) return;
+      setState(() {
+        _statusMessage =
+            'El servidor puede estar iniciando. Conservaremos tus datos mientras responde.';
+      });
+    });
 
     try {
       final token = await _authService.login(
@@ -68,14 +102,20 @@ class _LoginPageState extends State<LoginPage> {
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Error de conexión con el servidor 🔌'),
+        SnackBar(
+          content: Text(e.toString().replaceFirst('Exception: ', '')),
           backgroundColor: Colors.redAccent,
-          duration: Duration(seconds: 4),
+          duration: const Duration(seconds: 5),
         ),
       );
     } finally {
-      if (mounted) setState(() => loading = false);
+      _serverTimer?.cancel();
+      if (mounted) {
+        setState(() {
+          loading = false;
+          _statusMessage = null;
+        });
+      }
     }
   }
 
@@ -178,6 +218,8 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextField(
                         controller: _emailController,
+                        autofillHints: const [AutofillHints.email],
+                        textInputAction: TextInputAction.next,
                         keyboardType: TextInputType.emailAddress,
                         decoration: InputDecoration(
                           hintText: "ejemplo@correo.com",
@@ -212,7 +254,10 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                       TextField(
                         controller: _passwordController,
+                        autofillHints: const [AutofillHints.password],
+                        textInputAction: TextInputAction.done,
                         obscureText: _obscureText,
+                        onSubmitted: loading ? null : (_) => login(),
                         decoration: InputDecoration(
                           hintText: "••••••••",
                           hintStyle: const TextStyle(
@@ -298,6 +343,30 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
+                      if (_statusMessage != null) ...[
+                        const SizedBox(height: 16),
+                        Semantics(
+                          liveRegion: true,
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(
+                                0xFF667EEA,
+                              ).withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              _statusMessage!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                color: Color(0xFF475569),
+                                height: 1.4,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),

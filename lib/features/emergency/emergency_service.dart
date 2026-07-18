@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart'; // 🟢 NUEVO IMPORT
 
 import '../../core/config/api.dart';
+import '../../core/config/connectivity_service.dart';
+import '../../core/auth/session_service.dart';
 import '../../core/auth/token_storage.dart';
 
 class EmergencyResult {
@@ -16,6 +18,7 @@ class EmergencyResult {
   final int pushInvalidated;
   final String evidenceStatus;
   final String? evidenceWarning;
+  final int? messageId;
 
   const EmergencyResult({
     required this.twilioStatus,
@@ -27,6 +30,7 @@ class EmergencyResult {
     required this.pushInvalidated,
     this.evidenceStatus = 'not_provided',
     this.evidenceWarning,
+    this.messageId,
   });
 
   factory EmergencyResult.fromJson(Map<String, dynamic> data) {
@@ -45,6 +49,7 @@ class EmergencyResult {
     final twilio = delivery['twilio'];
     final push = delivery['push'];
     final evidence = delivery['evidence'];
+    final chat = delivery['chat'];
 
     return EmergencyResult(
       twilioStatus: twilio is Map
@@ -72,17 +77,20 @@ class EmergencyResult {
       evidenceWarning: evidence is Map && evidence['warning'] is Map
           ? '${evidence['warning']['message'] ?? ''}'
           : null,
+      messageId: chat is Map
+          ? int.tryParse('${chat['message_id'] ?? ''}')
+          : null,
     );
   }
   String get userMessage {
-    final pushMessage = _pushMessage;
-    final twilioMessage = _twilioMessage;
-    final evidenceMessage = _evidenceMessage;
+    final pushMessage = this.pushMessage;
+    final twilioMessage = sirenMessage;
+    final evidenceMessage = this.evidenceMessage;
 
     return 'La emergencia quedó registrada. $pushMessage $twilioMessage $evidenceMessage';
   }
 
-  String get _evidenceMessage {
+  String get evidenceMessage {
     if (evidenceStatus == 'uploaded') {
       return 'La evidencia fotográfica quedó adjunta.';
     }
@@ -97,7 +105,7 @@ class EmergencyResult {
     return '';
   }
 
-  String get _pushMessage {
+  String get pushMessage {
     if (pushStatus == 'sent') {
       return pushSuccess == 1
           ? 'Se envio 1 notificacion a un vecino.'
@@ -126,7 +134,7 @@ class EmergencyResult {
     return 'El servidor no informo el resultado de las notificaciones push.';
   }
 
-  String get _twilioMessage {
+  String get sirenMessage {
     if ([
       'queued',
       'ringing',
@@ -172,6 +180,12 @@ class EmergencyResult {
 }
 
 class EmergencyService {
+  static String userMessageForError(Object error) {
+    final friendly = ConnectivityService.friendlyMessage(error, fallback: '');
+    if (friendly.isNotEmpty) return friendly;
+    return error.toString().replaceFirst('Exception: ', '');
+  }
+
   /// Envía la emergencia al backend con justificación y evidencia fotográfica opcional.
   /// El backend obtiene automáticamente las coordenadas del domicilio
   /// registrado por el administrador.
@@ -179,6 +193,7 @@ class EmergencyService {
     required String justification,
     File? imageFile,
   }) async {
+    await ConnectivityService.instance.ensureConnected();
     final token = await TokenStorage().getToken();
     if (token == null) throw Exception("No hay sesión activa. Inicia sesión.");
 
@@ -213,6 +228,10 @@ class EmergencyService {
       ApiConfig.emergencyTimeout,
     );
     final res = await http.Response.fromStream(streamedResponse);
+
+    if (await SessionService.handleStatusCode(res.statusCode)) {
+      throw Exception('Tu sesión terminó.');
+    }
 
     if (res.statusCode != 201) {
       // Detectar si el servidor devolvió HTML (Render dormido)

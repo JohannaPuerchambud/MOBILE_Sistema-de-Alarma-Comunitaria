@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 import '../auth/token_storage.dart';
+import '../../features/chat/chat_page.dart';
+import '../../features/reports/report_list_page.dart';
 import 'api.dart';
 
 class PushNotificationService {
@@ -50,10 +52,7 @@ class PushNotificationService {
 
       final initialMessage = await _firebaseMessaging.getInitialMessage();
       if (initialMessage != null) {
-        debugPrint(
-          'App abierta desde notificación: '
-          '${initialMessage.notification?.title}',
-        );
+        _openNotification(initialMessage);
       }
     } catch (error) {
       debugPrint('No se pudo inicializar FCM: $error');
@@ -78,7 +77,7 @@ class PushNotificationService {
     _openedAppSubscription = FirebaseMessaging.onMessageOpenedApp.listen((
       message,
     ) {
-      debugPrint('Notificación abierta: ${message.notification?.title}');
+      _openNotification(message);
     });
   }
 
@@ -110,9 +109,52 @@ class PushNotificationService {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
+          action: SnackBarAction(
+            label: 'Ver',
+            onPressed: () => _openNotification(message),
+          ),
           duration: const Duration(seconds: 5),
         ),
       );
+  }
+
+  static String _notificationType(RemoteMessage message) {
+    final explicitType = message.data['type']?.toString().toLowerCase();
+    if (explicitType != null && explicitType.isNotEmpty) return explicitType;
+
+    final title = (message.notification?.title ?? '').toLowerCase();
+    if (title.contains('emergencia')) return 'emergency';
+    if (title.contains('actividad') || title.contains('reporte')) {
+      return 'report';
+    }
+    if (title.contains('mensaje')) return 'chat';
+    return '';
+  }
+
+  static void _openNotification(RemoteMessage message) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final navigator = navigatorKey?.currentState;
+      if (navigator == null) return;
+
+      final type = _notificationType(message);
+      if (type == 'chat') {
+        navigator.push(MaterialPageRoute(builder: (_) => const ChatPage()));
+        return;
+      }
+
+      if (type == 'report' || type == 'emergency') {
+        final activityId = message.data['activity_id']?.toString();
+        navigator.push(
+          MaterialPageRoute(
+            builder: (_) => ReportListPage(
+              initialActivityId: activityId == null || activityId.isEmpty
+                  ? null
+                  : activityId,
+            ),
+          ),
+        );
+      }
+    });
   }
 
   static Future<bool> sendTokenToBackend(String fcmToken) async {

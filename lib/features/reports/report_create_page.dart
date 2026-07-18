@@ -127,9 +127,11 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
       ).showSnackBar(SnackBar(content: Text(confirmation)));
       Navigator.pop(context, true);
     } catch (e) {
-      setState(() => error = e.toString().replaceFirst("Exception: ", ""));
+      if (mounted) {
+        setState(() => error = ReportService.userMessageForError(e));
+      }
     } finally {
-      setState(() => loading = false);
+      if (mounted) setState(() => loading = false);
     }
   }
 

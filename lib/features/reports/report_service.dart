@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
 
 import '../../core/config/api.dart';
+import '../../core/config/connectivity_service.dart';
+import '../../core/auth/session_service.dart';
 import '../../core/auth/token_storage.dart';
 import 'report_model.dart';
 
@@ -58,11 +60,18 @@ class ReportService {
     }
   }
 
-  Future<List<ReportModel>> getNeighborhoodReports() async {
+  static String userMessageForError(Object error) {
+    final friendly = ConnectivityService.friendlyMessage(error, fallback: '');
+    if (friendly.isNotEmpty) return friendly;
+    return error.toString().replaceFirst('Exception: ', '');
+  }
+
+  Future<List<NeighborhoodActivity>> getNeighborhoodActivity() async {
+    await ConnectivityService.instance.ensureConnected();
     final token = await TokenStorage().getToken();
     if (token == null) throw Exception("No hay token, inicia sesión.");
 
-    final url = Uri.parse("${ApiConfig.baseUrl}/reports/neighborhood");
+    final url = Uri.parse("${ApiConfig.baseUrl}/reports/activity");
     final res = await http
         .get(
           url,
@@ -73,17 +82,31 @@ class ReportService {
         )
         .timeout(ApiConfig.requestTimeout);
 
+    if (await SessionService.handleStatusCode(res.statusCode)) {
+      throw Exception('Tu sesión terminó.');
+    }
+
     if (res.statusCode == 200) {
       final data = _safeJsonDecode(res.body);
       if (data is List) {
-        return data.map((e) => ReportModel.fromJson(e)).toList();
+        return data
+            .whereType<Map>()
+            .map(
+              (item) => NeighborhoodActivity.fromJson(
+                Map<String, dynamic>.from(item),
+              ),
+            )
+            .toList();
       }
       throw Exception("Formato de respuesta inesperado.");
-    } else {
-      throw Exception(
-        _extractErrorMessage(res.body, "Error al cargar reportes."),
-      );
     }
+
+    throw Exception(
+      _extractErrorMessage(
+        res.body,
+        "Error al cargar la actividad del barrio.",
+      ),
+    );
   }
 
   /// ✅ Envía la imagen como multipart/form-data
@@ -93,6 +116,7 @@ class ReportService {
     required String description,
     File? imageFile,
   }) async {
+    await ConnectivityService.instance.ensureConnected();
     final token = await TokenStorage().getToken();
 
     if (token == null) throw Exception("No hay token, inicia sesión.");
@@ -129,6 +153,10 @@ class ReportService {
       ApiConfig.requestTimeout,
     );
     final res = await http.Response.fromStream(streamedResponse);
+
+    if (await SessionService.handleStatusCode(res.statusCode)) {
+      throw Exception('Tu sesión terminó.');
+    }
 
     if (res.statusCode != 201) {
       throw Exception(

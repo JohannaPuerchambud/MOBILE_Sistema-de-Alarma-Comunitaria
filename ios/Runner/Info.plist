@@ -51,7 +51,5 @@
         <string>Se requiere acceso a la cámara para tomar evidencia de la emergencia.</string>
         <key>NSPhotoLibraryUsageDescription</key>
         <string>Se requiere acceso a la galería para subir evidencia de la emergencia.</string>
-		<key>NSLocationWhenInUseUsageDescription</key>
-		<string>Se requiere acceso a la ubicacion para mostrar y compartir la ubicacion de la emergencia.</string>
 	</dict>
 </plist>
