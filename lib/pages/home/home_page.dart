@@ -65,13 +65,7 @@ class _HomePageState extends State<HomePage>
     String? modalError;
     File? evidenceImage;
     String? emergencyType;
-    const emergencyTypes = [
-      'Robo',
-      'Incendio',
-      'Accidente',
-      'Emergencia médica',
-      'Otro',
-    ];
+    const emergencyTypes = ['Robo', 'Incendio', 'Accidente', 'Otro'];
 
     showModalBottomSheet(
       context: context,

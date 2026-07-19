@@ -281,11 +281,13 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                           foreground: AppColors.emergency,
                         ),
                       ),
-                    AppGradientButton(
-                      label: 'Enviar reporte',
-                      icon: Icons.send_rounded,
-                      loading: loading,
-                      onPressed: loading ? null : _submit,
+                    Center(
+                      child: AppGradientButton(
+                        label: 'Enviar reporte',
+                        icon: Icons.send_rounded,
+                        loading: loading,
+                        onPressed: loading ? null : _submit,
+                      ),
                     ),
                   ],
                 ),
