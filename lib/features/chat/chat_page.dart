@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/config/api.dart';
 import '../../core/auth/token_storage.dart';
+import '../../core/media/image_upload_format.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
 import 'chat_service.dart';
@@ -243,6 +244,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       if (pickedFile == null) return;
       setState(() => _uploadingImage = true);
 
+      final imageBytes = await pickedFile.readAsBytes();
+      if (imageBytes.length > 5 * 1024 * 1024) {
+        throw const ChatException('La imagen supera el l\u00edmite de 5 MB.');
+      }
+
+      final imageFormat = ImageUploadFormat.detect(imageBytes);
+      if (imageFormat == null) {
+        throw const ChatException(
+          'La imagen no tiene un formato compatible (jpeg, png, webp o gif).',
+        );
+      }
+
       final token = await TokenStorage().getToken();
       if (token == null || token.isEmpty) {
         throw const ChatException(
@@ -256,7 +269,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       );
       request.headers['Authorization'] = 'Bearer $token';
       request.files.add(
-        await http.MultipartFile.fromPath('image', pickedFile.path),
+        http.MultipartFile.fromBytes(
+          'image',
+          imageBytes,
+          filename: imageFormat.normalizedFileName(pickedFile.name),
+          contentType: imageFormat.mediaType,
+        ),
       );
 
       final streamedResponse = await request.send().timeout(
