@@ -523,9 +523,27 @@ class _HomePageState extends State<HomePage>
       'queued',
       'ringing',
       'in-progress',
+      'in_progress',
+      'CALL_IN_PROGRESS',
+      'CALLING',
       'completed',
-    }.contains(result.twilioStatus);
-    final evidenceAttached = result.evidenceStatus == 'uploaded';
+      'FINISHED',
+    }.contains(result.sirenStatus);
+
+    // Mensaje de vecinos: simple y directo
+    String vecinosMsg;
+    if (result.pushSuccess > 0) {
+      vecinosMsg = result.pushSuccess == 1
+          ? 'Se alertó a 1 vecino del barrio.'
+          : 'Se alertaron ${result.pushSuccess} vecinos del barrio.';
+    } else if (result.pushStatus == 'no_recipients') {
+      vecinosMsg = 'No hay otros vecinos registrados aún.';
+    } else {
+      vecinosMsg = 'No se pudo notificar a los vecinos.';
+    }
+
+    // Ocultar fila de sirena si el barrio no tiene número configurado
+    final sirenNoNumber = result.sirenStatus == 'no_alarm_number';
 
     showDialog(
       context: context,
@@ -548,51 +566,46 @@ class _HomePageState extends State<HomePage>
                 color: Colors.green,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             const Text(
-              "Emergencia Registrada",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              '¡Alerta activada!',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 8),
-            const Divider(height: 24),
-            _deliveryChannelRow(
-              icon: Icons.check_circle_outline,
-              title: 'Registro',
-              message: 'La emergencia quedó registrada en el barrio.',
-              color: const Color(0xFF15803D),
+            const SizedBox(height: 4),
+            const Text(
+              'Los servicios de emergencia y tus vecinos han sido notificados.',
+              style: TextStyle(fontSize: 13, color: Colors.black54),
+              textAlign: TextAlign.center,
             ),
+            const SizedBox(height: 16),
+            const Divider(height: 1),
+            const SizedBox(height: 12),
+            // Fila: vecinos notificados
             _deliveryChannelRow(
               icon: pushDelivered
                   ? Icons.notifications_active_outlined
                   : Icons.notifications_off_outlined,
-              title: 'Notificaciones a vecinos',
-              message: result.pushMessage,
+              title: 'Vecinos notificados',
+              message: vecinosMsg,
               color: pushDelivered
-                  ? const Color(0xFF15803D)
-                  : const Color(0xFFB45309),
-            ),
-            _deliveryChannelRow(
-              icon: sirenActivated
-                  ? Icons.volume_up_outlined
-                  : Icons.volume_off_outlined,
-              title: 'Sirena del barrio',
-              message: result.sirenMessage,
-              color: sirenActivated
-                  ? const Color(0xFF15803D)
-                  : const Color(0xFFB45309),
-            ),
-            _deliveryChannelRow(
-              icon: evidenceAttached
-                  ? Icons.image_outlined
-                  : Icons.hide_image_outlined,
-              title: 'Evidencia',
-              message: result.evidenceMessage.isEmpty
-                  ? 'No se adjuntó evidencia fotográfica.'
-                  : result.evidenceMessage,
-              color: evidenceAttached
                   ? const Color(0xFF15803D)
                   : const Color(0xFF64748B),
             ),
+            // Fila: sirena — solo visible si el barrio tiene número configurado
+            if (!sirenNoNumber)
+              _deliveryChannelRow(
+                icon: sirenActivated
+                    ? Icons.volume_up_outlined
+                    : Icons.volume_off_outlined,
+                title: 'Sirena del barrio',
+                message: sirenActivated
+                    ? 'La sirena fue activada correctamente.'
+                    : 'La sirena no respondió. Contacta al administrador.',
+                color: sirenActivated
+                    ? const Color(0xFF15803D)
+                    : const Color(0xFFB45309),
+              ),
           ],
         ),
         actions: [

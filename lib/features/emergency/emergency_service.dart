@@ -9,8 +9,8 @@ import '../../core/auth/session_service.dart';
 import '../../core/auth/token_storage.dart';
 
 class EmergencyResult {
-  final String twilioStatus;
-  final String? twilioErrorCode;
+  final String sirenStatus;
+  final String? sirenErrorCode;
   final String pushStatus;
   final int pushAttempted;
   final int pushSuccess;
@@ -21,8 +21,8 @@ class EmergencyResult {
   final int? messageId;
 
   const EmergencyResult({
-    required this.twilioStatus,
-    this.twilioErrorCode,
+    required this.sirenStatus,
+    this.sirenErrorCode,
     required this.pushStatus,
     required this.pushAttempted,
     required this.pushSuccess,
@@ -37,7 +37,7 @@ class EmergencyResult {
     final delivery = data['delivery'];
     if (delivery is! Map) {
       return const EmergencyResult(
-        twilioStatus: 'unknown',
+        sirenStatus: 'unknown',
         pushStatus: 'unknown',
         pushAttempted: 0,
         pushSuccess: 0,
@@ -46,17 +46,18 @@ class EmergencyResult {
       );
     }
 
-    final twilio = delivery['twilio'];
+    // La clave en el JSON ahora es 'infobip' (migrado desde 'twilio')
+    final siren = delivery['infobip'] ?? delivery['twilio'];
     final push = delivery['push'];
     final evidence = delivery['evidence'];
     final chat = delivery['chat'];
 
     return EmergencyResult(
-      twilioStatus: twilio is Map
-          ? '${twilio['status'] ?? 'unknown'}'
+      sirenStatus: siren is Map
+          ? '${siren['status'] ?? 'unknown'}'
           : 'unknown',
-      twilioErrorCode: twilio is Map && twilio['error_code'] != null
-          ? '${twilio['error_code']}'
+      sirenErrorCode: siren is Map && siren['error_code'] != null
+          ? '${siren['error_code']}'
           : null,
       pushStatus: push is Map ? '${push['status'] ?? 'unknown'}' : 'unknown',
       pushAttempted: push is Map
@@ -84,10 +85,10 @@ class EmergencyResult {
   }
   String get userMessage {
     final pushMessage = this.pushMessage;
-    final twilioMessage = sirenMessage;
+    final sirenMsg = sirenMessage;
     final evidenceMessage = this.evidenceMessage;
 
-    return 'La emergencia quedó registrada. $pushMessage $twilioMessage $evidenceMessage';
+    return 'La emergencia quedó registrada. $pushMessage $sirenMsg $evidenceMessage';
   }
 
   String get evidenceMessage {
@@ -135,43 +136,39 @@ class EmergencyResult {
   }
 
   String get sirenMessage {
-    if ([
+    if (const {
       'queued',
       'ringing',
       'in-progress',
+      'in_progress',
+      'CALL_IN_PROGRESS',
+      'CALLING',
       'completed',
-    ].contains(twilioStatus)) {
-      return 'La llamada a la alarma fue creada correctamente.';
+      'FINISHED',
+    }.contains(sirenStatus)) {
+      return 'La llamada a la alarma fue iniciada correctamente.';
     }
 
-    if (twilioStatus == 'no_alarm_number') {
+    if (sirenStatus == 'no_alarm_number') {
       return 'El barrio no tiene un numero de alarma configurado.';
     }
 
-    if (twilioStatus == 'invalid_alarm_number') {
+    if (sirenStatus == 'invalid_alarm_number') {
       return 'El numero de alarma del barrio no tiene formato internacional valido.';
     }
 
-    if (twilioStatus == 'unverified_alarm_number') {
-      return 'El numero de alarma debe estar verificado en Twilio para cuentas de prueba.';
+    if (sirenStatus == 'infobip_auth_failed') {
+      return 'Las credenciales de Infobip del servidor no son validas.';
     }
 
-    if (twilioStatus == 'invalid_twilio_from') {
-      return 'El numero Twilio configurado no puede realizar llamadas.';
+    if (sirenStatus == 'not_configured') {
+      return 'El servicio de llamadas no esta configurado en el servidor.';
     }
 
-    if (twilioStatus == 'twilio_auth_failed') {
-      return 'Las credenciales de Twilio del servidor no son validas.';
-    }
-
-    if (twilioStatus == 'not_configured') {
-      return 'Twilio no esta configurado en el servidor.';
-    }
-
-    if (twilioStatus == 'failed') {
-      final code = twilioErrorCode == null
+    if (sirenStatus == 'failed' || sirenStatus == 'bad_request') {
+      final code = sirenErrorCode == null
           ? ''
-          : ' Codigo Twilio: $twilioErrorCode.';
+          : ' Codigo: $sirenErrorCode.';
       return 'No se pudo crear la llamada a la alarma.$code';
     }
 
