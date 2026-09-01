@@ -149,6 +149,10 @@ class EmergencyResult {
       return 'La llamada a la alarma fue iniciada correctamente.';
     }
 
+    if (sirenStatus == 'cooldown') {
+      return 'La sirena ya fue activada hace menos de 5 minutos. No se realizó una nueva llamada para evitar falsas alarmas.';
+    }
+
     if (sirenStatus == 'no_alarm_number') {
       return 'El barrio no tiene un numero de alarma configurado.';
     }

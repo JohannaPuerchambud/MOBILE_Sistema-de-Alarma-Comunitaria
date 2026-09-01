@@ -593,19 +593,33 @@ class _HomePageState extends State<HomePage>
                   : const Color(0xFF64748B),
             ),
             // Fila: sirena — solo visible si el barrio tiene número configurado
-            if (!sirenNoNumber)
-              _deliveryChannelRow(
-                icon: sirenActivated
-                    ? Icons.volume_up_outlined
-                    : Icons.volume_off_outlined,
+            if (!sirenNoNumber) () {
+              final isCooldown = result.sirenStatus == 'cooldown';
+              final String sirenMsg;
+              final Color sirenColor;
+              final IconData sirenIcon;
+
+              if (sirenActivated) {
+                sirenMsg = 'La sirena fue activada correctamente.';
+                sirenColor = const Color(0xFF15803D);
+                sirenIcon = Icons.volume_up_outlined;
+              } else if (isCooldown) {
+                sirenMsg = 'Sirena activada recientemente (< 5 min). Vecinos alertados.';
+                sirenColor = const Color(0xFF0284C7);
+                sirenIcon = Icons.timer_outlined;
+              } else {
+                sirenMsg = 'La sirena no respondió. Contacta al administrador.';
+                sirenColor = const Color(0xFFB45309);
+                sirenIcon = Icons.volume_off_outlined;
+              }
+
+              return _deliveryChannelRow(
+                icon: sirenIcon,
                 title: 'Sirena del barrio',
-                message: sirenActivated
-                    ? 'La sirena fue activada correctamente.'
-                    : 'La sirena no respondió. Contacta al administrador.',
-                color: sirenActivated
-                    ? const Color(0xFF15803D)
-                    : const Color(0xFFB45309),
-              ),
+                message: sirenMsg,
+                color: sirenColor,
+              );
+            }(),
           ],
         ),
         actions: [
