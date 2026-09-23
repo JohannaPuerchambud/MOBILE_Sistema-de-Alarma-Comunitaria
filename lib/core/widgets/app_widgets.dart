@@ -95,9 +95,9 @@ class AppGradientButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: AppColors.primary.withValues(alpha: 0.24),
-              blurRadius: 12,
-              offset: const Offset(0, 5),
+              color: AppColors.primary.withValues(alpha: 0.28),
+              blurRadius: 14,
+              offset: const Offset(0, 4),
             ),
           ],
         ),

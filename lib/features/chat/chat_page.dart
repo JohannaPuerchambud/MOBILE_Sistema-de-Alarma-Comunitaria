@@ -1,4 +1,4 @@
-import 'dart:convert';
+﻿import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -187,7 +187,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     }
   }
 
-  // ✅ Menú para elegir entre Cámara y Galería para el chat
+  // âœ… MenÃº para elegir entre CÃ¡mara y GalerÃ­a para el chat
   void _showImageSourceActionSheet() {
     showModalBottomSheet(
       context: context,
@@ -200,10 +200,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ListTile(
               leading: const Icon(
                 Icons.camera_alt_outlined,
-                color: Color(0xFF667EEA),
+                color: AppColors.primary,
               ),
               title: const Text(
-                'Tomar foto con la cámara',
+                'Tomar foto con la cÃ¡mara',
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               onTap: () {
@@ -214,10 +214,10 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ListTile(
               leading: const Icon(
                 Icons.photo_library_outlined,
-                color: Color(0xFF667EEA),
+                color: AppColors.primary,
               ),
               title: const Text(
-                'Elegir de la galería',
+                'Elegir de la galerÃ­a',
                 style: TextStyle(fontWeight: FontWeight.w500),
               ),
               onTap: () {
@@ -231,7 +231,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  // ✅ Seleccionar foto, comprimir, subir al backend y enviar URL al chat
+  // âœ… Seleccionar foto, comprimir, subir al backend y enviar URL al chat
   Future<void> _pickAndSendImage(ImageSource source) async {
     try {
       final XFile? pickedFile = await _picker.pickImage(
@@ -259,7 +259,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
       final token = await TokenStorage().getToken();
       if (token == null || token.isEmpty) {
         throw const ChatException(
-          'Tu sesión terminó. Inicia sesión nuevamente.',
+          'Tu sesiÃ³n terminÃ³. Inicia sesiÃ³n nuevamente.',
         );
       }
 
@@ -291,7 +291,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             message = decoded['message'].toString();
           }
         } catch (_) {
-          // La API no devolvió JSON; se conserva el mensaje seguro.
+          // La API no devolviÃ³ JSON; se conserva el mensaje seguro.
         }
         throw ChatException(message);
       }
@@ -302,7 +302,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           : null;
       if (downloadUrl == null || downloadUrl.isEmpty) {
         throw const ChatException(
-          'La imagen se guardó, pero la API no devolvió una dirección válida.',
+          'La imagen se guardÃ³, pero la API no devolviÃ³ una direcciÃ³n vÃ¡lida.',
         );
       }
 
@@ -325,12 +325,12 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(s)));
   }
 
-  // ✅ Función auxiliar para formatear la fecha
+  // âœ… FunciÃ³n auxiliar para formatear la fecha
   String _formatTime(DateTime dateTime) {
     return DateFormat('HH:mm').format(dateTime);
   }
 
-  // ✅ Función auxiliar para mostrar un divisor de fecha si cambió el día
+  // âœ… FunciÃ³n auxiliar para mostrar un divisor de fecha si cambiÃ³ el dÃ­a
   Widget _buildDateDivider(DateTime dateTime) {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 16),
@@ -357,7 +357,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  // ✅ Widget para renderizar la imagen dentro de la burbuja
+  // âœ… Widget para renderizar la imagen dentro de la burbuja
   Widget _buildChatImage(String imageUrl, bool isMine) {
     final imageSize = (MediaQuery.sizeOf(context).width * 0.62)
         .clamp(180.0, 220.0)
@@ -382,7 +382,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 color: isMine ? Colors.white24 : Colors.grey[200],
                 child: const Center(
                   child: CircularProgressIndicator(
-                    color: Color(0xFF667EEA),
+                    color: AppColors.primary,
                     strokeWidth: 2,
                   ),
                 ),
@@ -402,19 +402,19 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     );
   }
 
-  // ✅ Ver imagen en pantalla completa
-  // ✅ Detecta si un mensaje contiene ubicación (formato nuevo o antiguo)
+  // âœ… Ver imagen en pantalla completa
+  // âœ… Detecta si un mensaje contiene ubicaciÃ³n (formato nuevo o antiguo)
   static final _locationTagRegex = RegExp(
     r'\[LOCATION:([\-\d.]+),([\-\d.]+)\]',
   );
   static final _legacyMapsRegex = RegExp(
-    r'📍\s*Ubicación:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)',
+    r'ðŸ“\s*UbicaciÃ³n:\s*(https://maps\.google\.com/\?q=[\-\d.,]+)',
   );
   static final _noEvidenceRegex = RegExp(r'\[NO_EVIDENCE\]');
 
   /// Detecta si un mensaje es de emergencia
   bool _isEmergencyMessage(String message) {
-    return message.contains('🚨') && message.contains('EMERGENCIA ACTIVADA');
+    return message.contains('ðŸš¨') && message.contains('EMERGENCIA ACTIVADA');
   }
 
   /// Extrae la URL de Google Maps del mensaje, si existe.
@@ -440,11 +440,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
     return cleaned;
   }
 
-  /// Construye el botón de "Ver Ubicación" para mensajes de emergencia.
+  /// Construye el botÃ³n de "Ver UbicaciÃ³n" para mensajes de emergencia.
   Widget _buildLocationButton(String mapsUrl, bool isMine) {
     return Semantics(
       button: true,
-      label: 'Abrir ubicación en Google Maps',
+      label: 'Abrir ubicaciÃ³n en Google Maps',
       child: GestureDetector(
         onTap: () async {
           try {
@@ -468,7 +468,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Colors.white.withValues(alpha: 0.25),
                       Colors.white.withValues(alpha: 0.10),
                     ]
-                  : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                  : [const AppColors.primary, const AppColors.primaryDark],
             ),
             borderRadius: BorderRadius.circular(12),
             border: isMine
@@ -488,7 +488,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               ),
               const SizedBox(width: 6),
               Text(
-                '📍 Ver Ubicación',
+                'ðŸ“ Ver UbicaciÃ³n',
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
@@ -564,7 +564,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         children: [
           if (connecting)
             const LinearProgressIndicator(
-              color: Color(0xFF667EEA),
+              color: AppColors.primary,
               backgroundColor: Colors.white,
             ),
 
@@ -584,7 +584,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   Expanded(
                     child: Text(
                       _connectionMessage ??
-                          'Reconectando el chat en tiempo real…',
+                          'Reconectando el chat en tiempo realâ€¦',
                       style: const TextStyle(
                         color: Color(0xFF6B4E00),
                         fontSize: 12,
@@ -603,11 +603,11 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               ),
             ),
 
-          // ✅ Indicador de subida de imagen
+          // âœ… Indicador de subida de imagen
           if (_uploadingImage)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+              color: const AppColors.primary.withValues(alpha: 0.1),
               child: const Row(
                 children: [
                   SizedBox(
@@ -615,13 +615,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Color(0xFF667EEA),
+                      color: AppColors.primary,
                     ),
                   ),
                   SizedBox(width: 12),
                   Text(
                     'Subiendo imagen...',
-                    style: TextStyle(color: Color(0xFF667EEA), fontSize: 13),
+                    style: TextStyle(color: AppColors.primary, fontSize: 13),
                   ),
                 ],
               ),
@@ -631,7 +631,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             child: messages.isEmpty
                 ? const Center(
                     child: Text(
-                      'Aún no hay mensajes',
+                      'AÃºn no hay mensajes',
                       style: TextStyle(fontSize: 15, color: Colors.black54),
                     ),
                   )
@@ -647,7 +647,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                       itemCount: messages.length,
                       itemBuilder: (_, i) {
-                        // Mapeamos el índice invertido al índice real de la lista original
+                        // Mapeamos el Ã­ndice invertido al Ã­ndice real de la lista original
                         final originalIndex = messages.length - 1 - i;
                         final m = messages[originalIndex];
 
@@ -657,7 +657,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                             ? 'Usuario'
                             : m.fullName;
 
-                        // ✅ Lógica de agrupación:
+                        // âœ… LÃ³gica de agrupaciÃ³n:
                         // 1. Verificamos si el mensaje anterior (visualmente el de arriba) es del mismo usuario
                         bool isSameUserAsPrevious = false;
                         if (originalIndex > 0) {
@@ -666,7 +666,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                               previousMessage.userId == m.userId;
                         }
 
-                        // 2. Verificamos si hubo un cambio de día respecto al mensaje anterior
+                        // 2. Verificamos si hubo un cambio de dÃ­a respecto al mensaje anterior
                         bool isDifferentDay = false;
                         if (originalIndex > 0) {
                           final previousMessage = messages[originalIndex - 1];
@@ -679,18 +679,18 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   m.createdAt.year;
                         }
 
-                        // Si cambió el día, forzamos a que no se agrupe para mostrar el separador
+                        // Si cambiÃ³ el dÃ­a, forzamos a que no se agrupe para mostrar el separador
                         if (isDifferentDay) {
                           isSameUserAsPrevious = false;
                         }
 
-                        // ✅ Renderizado del mensaje
+                        // âœ… Renderizado del mensaje
                         return Column(
                           crossAxisAlignment: isMine
                               ? CrossAxisAlignment.end
                               : CrossAxisAlignment.start,
                           children: [
-                            // Mostrar el divisor de fecha si es el primer mensaje o si cambió el día
+                            // Mostrar el divisor de fecha si es el primer mensaje o si cambiÃ³ el dÃ­a
                             if (originalIndex == 0 || isDifferentDay)
                               _buildDateDivider(m.createdAt),
 
@@ -699,7 +699,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   ? Alignment.centerRight
                                   : Alignment.centerLeft,
                               child: Container(
-                                // ✅ Margen superior reducido si es un mensaje agrupado
+                                // âœ… Margen superior reducido si es un mensaje agrupado
                                 margin: EdgeInsets.only(
                                   top: isSameUserAsPrevious ? 2 : 12,
                                   bottom: 2,
@@ -721,7 +721,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                   border: isMine
                                       ? null
                                       : Border.all(color: AppColors.border),
-                                  // ✅ Ajustamos los bordes si está agrupado
+                                  // âœ… Ajustamos los bordes si estÃ¡ agrupado
                                   borderRadius: BorderRadius.only(
                                     topLeft: const Radius.circular(16),
                                     topRight: const Radius.circular(16),
@@ -743,7 +743,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    // ✅ Solo mostrar el nombre si NO está agrupado
+                                    // âœ… Solo mostrar el nombre si NO estÃ¡ agrupado
                                     if (!isSameUserAsPrevious) ...[
                                       Padding(
                                         padding: EdgeInsets.only(
@@ -751,29 +751,29 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                           bottom: 4,
                                         ),
                                         child: Text(
-                                          isMine ? 'Tú' : name,
+                                          isMine ? 'TÃº' : name,
                                           style: TextStyle(
                                             fontSize: 12,
                                             fontWeight: FontWeight.bold,
                                             color: isMine
                                                 ? Colors.white70
-                                                : const Color(0xFF764BA2),
+                                                : const AppColors.primaryDark,
                                           ),
                                         ),
                                       ),
                                     ],
 
-                                    // ✅ Imagen del mensaje (si existe y NO es emergencia)
-                                    // En emergencias, la imagen se muestra después del botón de ubicación
+                                    // âœ… Imagen del mensaje (si existe y NO es emergencia)
+                                    // En emergencias, la imagen se muestra despuÃ©s del botÃ³n de ubicaciÃ³n
                                     if (m.hasImage &&
                                         !_isEmergencyMessage(m.message)) ...[
                                       _buildChatImage(m.imageUrl!, isMine),
                                       const SizedBox(height: 6),
                                     ],
 
-                                    // ✅ Texto del mensaje (solo si no es solo foto)
+                                    // âœ… Texto del mensaje (solo si no es solo foto)
                                     if (m.message.isNotEmpty &&
-                                        m.message != '📷 Foto') ...[
+                                        m.message != 'ðŸ“· Foto') ...[
                                       Builder(
                                         builder: (_) {
                                           final mapsUrl = _extractMapsUrl(
@@ -820,7 +820,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                                     isMine,
                                                   ),
                                                 ),
-                                              // ✅ Evidencia de emergencia: imagen o "Sin evidencia"
+                                              // âœ… Evidencia de emergencia: imagen o "Sin evidencia"
                                               if (isEmergency) ...[
                                                 const SizedBox(height: 8),
                                                 Padding(
@@ -830,7 +830,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                                         : 0,
                                                   ),
                                                   child: Text(
-                                                    '📸 Evidencia:',
+                                                    'ðŸ“¸ Evidencia:',
                                                     style: TextStyle(
                                                       fontSize: 12,
                                                       fontWeight:
@@ -920,7 +920,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                       ),
                                     ],
 
-                                    // ✅ Etiqueta de hora alineada a la derecha
+                                    // âœ… Etiqueta de hora alineada a la derecha
                                     const SizedBox(height: 4),
                                     Padding(
                                       padding: EdgeInsets.only(
@@ -950,7 +950,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   ),
           ),
 
-          // ✅ Barra de entrada con botón de foto
+          // âœ… Barra de entrada con botÃ³n de foto
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: const BoxDecoration(
@@ -967,9 +967,9 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
               top: false,
               child: Row(
                 children: [
-                  // ✅ Botón de adjuntar foto
+                  // âœ… BotÃ³n de adjuntar foto
                   IconButton(
-                    tooltip: 'Adjuntar fotografía',
+                    tooltip: 'Adjuntar fotografÃ­a',
                     onPressed: _uploadingImage || _sendingMessage
                         ? null
                         : _showImageSourceActionSheet,
@@ -977,7 +977,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Icons.attach_file_rounded,
                       color: _uploadingImage
                           ? Colors.grey
-                          : const Color(0xFF667EEA),
+                          : const AppColors.primary,
                     ),
                   ),
                   Expanded(
@@ -1008,7 +1008,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                        colors: [AppColors.primary, AppColors.primaryDark],
                       ),
                       shape: BoxShape.circle,
                     ),
