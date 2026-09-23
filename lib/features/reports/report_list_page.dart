@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/widgets/app_widgets.dart';
@@ -381,10 +381,10 @@ class _ReportListPageState extends State<ReportListPage> {
             fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
-          selectedColor: const AppColors.primary,
+          selectedColor: AppColors.primary,
           backgroundColor: Colors.white,
           side: BorderSide(
-            color: selected ? const AppColors.primary : const AppColors.border,
+            color: selected ? AppColors.primary : AppColors.border,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -663,7 +663,7 @@ class _ReportListPageState extends State<ReportListPage> {
                     color: AppColors.emergency,
                   )
                 : RefreshIndicator(
-                    color: const AppColors.primary,
+                    color: AppColors.primary,
                     onRefresh: _load,
                     child: visibleActivity.isEmpty
                         ? _buildEmptyState()
@@ -737,7 +737,7 @@ class _DetailRow extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const AppColors.primary, size: 20),
+            Icon(icon, color: AppColors.primary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

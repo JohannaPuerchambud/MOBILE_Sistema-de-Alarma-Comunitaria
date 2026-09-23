@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:jwt_decoder/jwt_decoder.dart';
@@ -468,7 +468,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Colors.white.withValues(alpha: 0.25),
                       Colors.white.withValues(alpha: 0.10),
                     ]
-                  : [const AppColors.primary, const AppColors.primaryDark],
+                  : [AppColors.primary, AppColors.primaryDark],
             ),
             borderRadius: BorderRadius.circular(12),
             border: isMine
@@ -607,7 +607,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           if (_uploadingImage)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: const AppColors.primary.withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               child: const Row(
                 children: [
                   SizedBox(
@@ -757,7 +757,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                             fontWeight: FontWeight.bold,
                                             color: isMine
                                                 ? Colors.white70
-                                                : const AppColors.primaryDark,
+                                                : AppColors.primaryDark,
                                           ),
                                         ),
                                       ),
@@ -977,7 +977,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Icons.attach_file_rounded,
                       color: _uploadingImage
                           ? Colors.grey
-                          : const AppColors.primary,
+                          : AppColors.primary,
                     ),
                   ),
                   Expanded(
