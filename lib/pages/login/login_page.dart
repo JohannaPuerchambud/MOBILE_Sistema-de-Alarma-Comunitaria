@@ -176,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
               child: Container(
                 width: double.infinity,
                 decoration: const BoxDecoration(
-                  color: Colors.white,
+                  color: AppColors.surface,
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(28),
                     topRight: Radius.circular(28),
@@ -201,7 +201,7 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF333333),
+                                color: AppColors.text,
                               ),
                             ),
                           ),
@@ -211,7 +211,7 @@ class _LoginPageState extends State<LoginPage> {
                           const Text(
                             "Correo Electrónico",
                             style: TextStyle(
-                              color: Color(0xFF764BA2),
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -232,7 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                           const Text(
                             "Contraseña",
                             style: TextStyle(
-                              color: Color(0xFF764BA2),
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -281,16 +281,14 @@ class _LoginPageState extends State<LoginPage> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: const Color(
-                                    0xFF667EEA,
-                                  ).withValues(alpha: 0.08),
+                                  color: AppColors.surfaceMuted,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   _statusMessage!,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                    color: Color(0xFF475569),
+                                    color: AppColors.textSecondary,
                                     height: 1.4,
                                   ),
                                 ),

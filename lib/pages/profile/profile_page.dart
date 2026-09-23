@@ -86,10 +86,10 @@ class _ProfilePageState extends State<ProfilePage> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+          color: AppColors.primary.withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: const Color(0xFF667EEA), size: 24),
+        child: Icon(icon, color: AppColors.primary, size: 24),
       ),
       title: Text(
         title,
@@ -99,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
         value,
         style: const TextStyle(
           fontSize: 15,
-          color: Color(0xFF333333),
+          color: AppColors.text,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -131,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Icon(
                       Icons.person,
                       size: 55,
-                      color: Color(0xFF667EEA),
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
+                  color: AppColors.text,
                 ),
               ),
               Text(
@@ -223,7 +223,7 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             child: const Icon(
                               Icons.admin_panel_settings_outlined,
-                              color: Color(0xFF667EEA),
+                              color: AppColors.primary,
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -236,7 +236,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
-                                    color: Color(0xFF333333),
+                                    color: AppColors.text,
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -245,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ? 'Revisando permisos...'
                                       : '${_permissions?.grantedCount ?? 0} de ${AppPermissionsSnapshot.totalCount} habilitados',
                                   style: const TextStyle(
-                                    color: Color(0xFF667EEA),
+                                    color: AppColors.primary,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -253,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const Text(
                                   'Notificaciones, cámara y galería',
                                   style: TextStyle(
-                                    color: Color(0xFF616161),
+                                    color: AppColors.textSecondary,
                                     fontSize: 12,
                                   ),
                                 ),
@@ -262,7 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const Icon(
                             Icons.chevron_right,
-                            color: Color(0xFF667EEA),
+                            color: AppColors.primary,
                           ),
                         ],
                       ),
@@ -277,7 +277,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: 55,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF333333),
+                    backgroundColor: AppColors.text,
                     foregroundColor: Colors.white,
                     elevation: 4,
                     shape: RoundedRectangleBorder(
