@@ -89,7 +89,6 @@ class AppGradientButton extends StatelessWidget {
       enabled: onPressed != null && !loading,
       label: loading ? '$label. Procesando.' : label,
       child: Container(
-        width: double.infinity,
         height: 54,
         decoration: BoxDecoration(
           gradient: AppTheme.brandGradient,

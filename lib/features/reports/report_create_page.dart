@@ -44,7 +44,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
             ListTile(
               leading: const Icon(
                 Icons.camera_alt_outlined,
-                color: AppColors.primary,
+                color: Color(0xFF667EEA),
               ),
               title: const Text(
                 'Tomar foto con la cámara',
@@ -58,7 +58,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
             ListTile(
               leading: const Icon(
                 Icons.photo_library_outlined,
-                color: AppColors.primary,
+                color: Color(0xFF667EEA),
               ),
               title: const Text(
                 'Elegir de la galería',
@@ -162,7 +162,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Título de la alerta",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),
@@ -180,7 +180,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Descripción detallada",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),
@@ -198,7 +198,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Evidencia fotográfica (Opcional)",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),
@@ -215,9 +215,9 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                           height: 156,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceMuted,
+                            color: const Color(0xFFF8F9FA),
                             border: Border.all(
-                              color: AppColors.border,
+                              color: const Color(0xFFE0E0E0),
                               width: 2,
                               style: BorderStyle.solid,
                             ),
@@ -237,13 +237,13 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                                     Icon(
                                       Icons.add_a_photo_outlined,
                                       size: 50,
-                                      color: AppColors.textMuted,
+                                      color: Color(0xFF999999),
                                     ),
                                     SizedBox(height: 12),
                                     Text(
                                       "Toca para tomar o subir una foto",
                                       style: TextStyle(
-                                        color: AppColors.textSecondary,
+                                        color: Color(0xFF777777),
                                         fontWeight: FontWeight.w500,
                                       ),
                                     ),

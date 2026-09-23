@@ -8,7 +8,6 @@ import 'package:http/http.dart' as http;
 import '../auth/token_storage.dart';
 import '../../features/chat/chat_page.dart';
 import '../../features/reports/report_list_page.dart';
-import '../theme/app_theme.dart';
 import 'api.dart';
 
 class PushNotificationService {
@@ -105,7 +104,7 @@ class PushNotificationService {
                 Text(body, style: const TextStyle(fontSize: 13)),
             ],
           ),
-          backgroundColor: AppColors.primary,
+          backgroundColor: const Color(0xFF667EEA),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),

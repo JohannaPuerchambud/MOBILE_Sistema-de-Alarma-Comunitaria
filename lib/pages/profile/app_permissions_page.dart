@@ -72,7 +72,7 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: AppColors.primary, size: 32),
+              Icon(icon, color: const Color(0xFF667EEA), size: 32),
               const SizedBox(height: 12),
               Text(
                 title,
@@ -84,7 +84,7 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
               const SizedBox(height: 8),
               Text(
                 description,
-                style: const TextStyle(color: AppColors.textSecondary, height: 1.45),
+                style: const TextStyle(color: Color(0xFF616161), height: 1.45),
               ),
             ],
           ),
@@ -103,7 +103,7 @@ class _AppPermissionsPageState extends State<AppPermissionsPage>
           child: Text(
             title.toUpperCase(),
             style: const TextStyle(
-              color: AppColors.primary,
+              color: Color(0xFF667EEA),
               fontSize: 12,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.8,
