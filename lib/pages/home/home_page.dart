@@ -79,7 +79,7 @@ class _HomePageState extends State<HomePage>
             ),
             child: Container(
               decoration: const BoxDecoration(
-                color: Colors.white,
+                color: AppColors.surface,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
               ),
               padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -92,7 +92,7 @@ class _HomePageState extends State<HomePage>
                       width: 40,
                       height: 4,
                       decoration: BoxDecoration(
-                        color: Colors.grey[300],
+                        color: AppColors.border,
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage>
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF333333),
+                        color: AppColors.text,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage>
                         'Tipo de emergencia',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF333333),
+                          color: AppColors.text,
                         ),
                       ),
                     ),
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage>
                                 side: BorderSide(
                                   color: emergencyType == type
                                       ? AppColors.emergency
-                                      : const Color(0xFFD1D5DB),
+                                      : AppColors.border,
                                 ),
                               ),
                             )
@@ -181,11 +181,11 @@ class _HomePageState extends State<HomePage>
                             : 'Detalle adicional (opcional)',
                         hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
-                        fillColor: const Color(0xFFF8F9FA),
+                        fillColor: AppColors.surfaceMuted,
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: const BorderSide(
-                            color: Color(0xFFE0E0E0),
+                            color: AppColors.border,
                             width: 1.5,
                           ),
                         ),
@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage>
                         "Evidencia fotográfica (Opcional)",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF555555),
+                          color: AppColors.textSecondary,
                           fontSize: 13,
                         ),
                       ),
@@ -286,9 +286,9 @@ class _HomePageState extends State<HomePage>
                         height: 120,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF8F9FA),
+                          color: AppColors.surfaceMuted,
                           border: Border.all(
-                            color: const Color(0xFFE0E0E0),
+                            color: AppColors.border,
                             width: 1.5,
                           ),
                           borderRadius: BorderRadius.circular(12),
@@ -307,13 +307,13 @@ class _HomePageState extends State<HomePage>
                                   Icon(
                                     Icons.add_a_photo_outlined,
                                     size: 32,
-                                    color: Color(0xFF999999),
+                                    color: AppColors.textMuted,
                                   ),
                                   SizedBox(height: 6),
                                   Text(
                                     "Toca para adjuntar evidencia",
                                     style: TextStyle(
-                                      color: Color(0xFF777777),
+                                      color: AppColors.textSecondary,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                     ),
@@ -503,7 +503,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     message,
                     style: const TextStyle(
-                      color: Color(0xFF616161),
+                      color: AppColors.textSecondary,
                       height: 1.35,
                     ),
                   ),
@@ -677,7 +677,7 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 32, color: AppColors.primary),
@@ -691,7 +691,7 @@ class _HomePageState extends State<HomePage>
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF333333),
+                  color: AppColors.text,
                 ),
               ),
             ),
@@ -737,7 +737,7 @@ class _HomePageState extends State<HomePage>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF555555),
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 6),
@@ -824,7 +824,7 @@ class _HomePageState extends State<HomePage>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF555555),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),

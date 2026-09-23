@@ -200,7 +200,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ListTile(
               leading: const Icon(
                 Icons.camera_alt_outlined,
-                color: Color(0xFF667EEA),
+                color: AppColors.primary,
               ),
               title: const Text(
                 'Tomar foto con la cámara',
@@ -214,7 +214,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
             ListTile(
               leading: const Icon(
                 Icons.photo_library_outlined,
-                color: Color(0xFF667EEA),
+                color: AppColors.primary,
               ),
               title: const Text(
                 'Elegir de la galería',
@@ -382,7 +382,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                 color: isMine ? Colors.white24 : Colors.grey[200],
                 child: const Center(
                   child: CircularProgressIndicator(
-                    color: Color(0xFF667EEA),
+                    color: AppColors.primary,
                     strokeWidth: 2,
                   ),
                 ),
@@ -468,7 +468,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Colors.white.withValues(alpha: 0.25),
                       Colors.white.withValues(alpha: 0.10),
                     ]
-                  : [const Color(0xFF667EEA), const Color(0xFF764BA2)],
+                  : [AppColors.primary, AppColors.primaryDark],
             ),
             borderRadius: BorderRadius.circular(12),
             border: isMine
@@ -564,7 +564,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
         children: [
           if (connecting)
             const LinearProgressIndicator(
-              color: Color(0xFF667EEA),
+              color: AppColors.primary,
               backgroundColor: Colors.white,
             ),
 
@@ -607,7 +607,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
           if (_uploadingImage)
             Container(
               padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-              color: const Color(0xFF667EEA).withValues(alpha: 0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               child: const Row(
                 children: [
                   SizedBox(
@@ -615,13 +615,13 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      color: Color(0xFF667EEA),
+                      color: AppColors.primary,
                     ),
                   ),
                   SizedBox(width: 12),
                   Text(
                     'Subiendo imagen...',
-                    style: TextStyle(color: Color(0xFF667EEA), fontSize: 13),
+                    style: TextStyle(color: AppColors.primary, fontSize: 13),
                   ),
                 ],
               ),
@@ -757,7 +757,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                                             fontWeight: FontWeight.bold,
                                             color: isMine
                                                 ? Colors.white70
-                                                : const Color(0xFF764BA2),
+                                                : AppColors.primaryDark,
                                           ),
                                         ),
                                       ),
@@ -977,7 +977,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                       Icons.attach_file_rounded,
                       color: _uploadingImage
                           ? Colors.grey
-                          : const Color(0xFF667EEA),
+                          : AppColors.primary,
                     ),
                   ),
                   Expanded(
@@ -1008,7 +1008,7 @@ class _ChatPageState extends State<ChatPage> with WidgetsBindingObserver {
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
+                        colors: [AppColors.primary, AppColors.primaryDark],
                       ),
                       shape: BoxShape.circle,
                     ),

@@ -381,10 +381,10 @@ class _ReportListPageState extends State<ReportListPage> {
             fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
-          selectedColor: const Color(0xFF667EEA),
+          selectedColor: AppColors.primary,
           backgroundColor: Colors.white,
           side: BorderSide(
-            color: selected ? const Color(0xFF667EEA) : const Color(0xFFE4E7EC),
+            color: selected ? AppColors.primary : const Color(0xFFE4E7EC),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -651,7 +651,7 @@ class _ReportListPageState extends State<ReportListPage> {
           Expanded(
             child: loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: Color(0xFF667EEA)),
+                    child: CircularProgressIndicator(color: AppColors.primary),
                   )
                 : error != null
                 ? AppStatusView(
@@ -663,7 +663,7 @@ class _ReportListPageState extends State<ReportListPage> {
                     color: AppColors.emergency,
                   )
                 : RefreshIndicator(
-                    color: const Color(0xFF667EEA),
+                    color: AppColors.primary,
                     onRefresh: _load,
                     child: visibleActivity.isEmpty
                         ? _buildEmptyState()
@@ -705,7 +705,7 @@ class _DetailSection extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: Color(0xFF667EEA),
+              color: AppColors.primary,
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.7,
@@ -737,7 +737,7 @@ class _DetailRow extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: const Color(0xFF667EEA), size: 20),
+            Icon(icon, color: AppColors.primary, size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  static const primary = Color(0xFF667EEA);
-  static const messageSent = Color(0xFF5368A6);
-  static const secondary = Color(0xFF764BA2);
-  static const emergency = Color(0xFFD32F2F);
-  static const emergencyLight = Color(0xFFFF5252);
+  static const primary = Color(0xFF2563EB);
+  static const primaryDark = Color(0xFF1E40AF);
+  static const primaryHover = Color(0xFF1D4ED8);
+  static const messageSent = Color(0xFF2563EB);
+  static const secondary = Color(0xFF1E40AF);
+  static const emergency = Color(0xFFEF4444);
+  static const emergencyLight = Color(0xFFF87171);
   static const report = Color(0xFFF59E0B);
-  static const success = Color(0xFF15803D);
-  static const warning = Color(0xFFB45309);
-  static const background = Color(0xFFF4F6F9);
-  static const surface = Colors.white;
-  static const surfaceMuted = Color(0xFFF8F9FA);
-  static const text = Color(0xFF1D2939);
-  static const textSecondary = Color(0xFF667085);
-  static const textMuted = Color(0xFF98A2B3);
-  static const border = Color(0xFFEAECF0);
+  static const success = Color(0xFF10B981);
+  static const warning = Color(0xFFF59E0B);
+  static const background = Color(0xFF0B1120);
+  static const surface = Color(0xFF0F172A);
+  static const surfaceMuted = Color(0xFF1E293B);
+  static const text = Color(0xFFF8FAFC);
+  static const textSecondary = Color(0xFF94A3B8);
+  static const textMuted = Color(0xFF64748B);
+  static const border = Color(0xFF334155);
 }
 
 abstract final class AppTheme {
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [AppColors.primary, AppColors.secondary],
+    colors: [AppColors.primary, AppColors.primaryDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -28,6 +30,7 @@ abstract final class AppTheme {
   static ThemeData get light {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
+      brightness: Brightness.dark,
       primary: AppColors.primary,
       secondary: AppColors.secondary,
       error: AppColors.emergency,
