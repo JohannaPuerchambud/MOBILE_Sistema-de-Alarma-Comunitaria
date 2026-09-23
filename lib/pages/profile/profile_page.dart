@@ -86,10 +86,10 @@ class _ProfilePageState extends State<ProfilePage> {
       leading: Container(
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: AppColors.primary.withValues(alpha: 0.1),
+          color: const Color(0xFF667EEA).withValues(alpha: 0.1),
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: AppColors.primary, size: 24),
+        child: Icon(icon, color: const Color(0xFF667EEA), size: 24),
       ),
       title: Text(
         title,
@@ -99,7 +99,7 @@ class _ProfilePageState extends State<ProfilePage> {
         value,
         style: const TextStyle(
           fontSize: 15,
-          color: AppColors.text,
+          color: Color(0xFF333333),
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -131,7 +131,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Icon(
                       Icons.person,
                       size: 55,
-                      color: AppColors.primary,
+                      color: Color(0xFF667EEA),
                     ),
                   ),
                 ),
@@ -142,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.text,
+                  color: Color(0xFF333333),
                 ),
               ),
               Text(
@@ -170,19 +170,19 @@ class _ProfilePageState extends State<ProfilePage> {
                         "Correo Electrónico",
                         userEmail,
                       ),
-                      const Divider(height: 1, color: AppColors.border),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
                       _buildInfoRow(
                         Icons.phone_outlined,
                         "Teléfono Celular",
                         userPhone,
                       ),
-                      const Divider(height: 1, color: AppColors.border),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
                       _buildInfoRow(
                         Icons.location_on_outlined,
                         "Dirección de Domicilio",
                         userAddress,
                       ),
-                      const Divider(height: 1, color: AppColors.border),
+                      const Divider(height: 1, color: Color(0xFFEEEEEE)),
                       _buildInfoRow(
                         Icons.maps_home_work_outlined,
                         "Barrio Asignado",
@@ -216,12 +216,14 @@ class _ProfilePageState extends State<ProfilePage> {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.10),
+                              color: const Color(
+                                0xFF667EEA,
+                              ).withValues(alpha: 0.10),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
                               Icons.admin_panel_settings_outlined,
-                              color: AppColors.primary,
+                              color: Color(0xFF667EEA),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -234,7 +236,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   style: TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.text,
+                                    color: Color(0xFF333333),
                                   ),
                                 ),
                                 const SizedBox(height: 4),
@@ -243,7 +245,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                       ? 'Revisando permisos...'
                                       : '${_permissions?.grantedCount ?? 0} de ${AppPermissionsSnapshot.totalCount} habilitados',
                                   style: const TextStyle(
-                                    color: AppColors.primary,
+                                    color: Color(0xFF667EEA),
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
@@ -251,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                 const Text(
                                   'Notificaciones, cámara y galería',
                                   style: TextStyle(
-                                    color: AppColors.textSecondary,
+                                    color: Color(0xFF616161),
                                     fontSize: 12,
                                   ),
                                 ),
@@ -260,7 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ),
                           const Icon(
                             Icons.chevron_right,
-                            color: AppColors.primary,
+                            color: Color(0xFF667EEA),
                           ),
                         ],
                       ),
@@ -275,7 +277,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 height: 55,
                 child: ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primaryDeep,
+                    backgroundColor: const Color(0xFF333333),
                     foregroundColor: Colors.white,
                     elevation: 4,
                     shape: RoundedRectangleBorder(

@@ -44,7 +44,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
             ListTile(
               leading: const Icon(
                 Icons.camera_alt_outlined,
-                color: AppColors.primary,
+                color: Color(0xFF667EEA),
               ),
               title: const Text(
                 'Tomar foto con la cámara',
@@ -58,7 +58,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
             ListTile(
               leading: const Icon(
                 Icons.photo_library_outlined,
-                color: AppColors.primary,
+                color: Color(0xFF667EEA),
               ),
               title: const Text(
                 'Elegir de la galería',
@@ -162,7 +162,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Título de la alerta",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),
@@ -180,7 +180,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Descripción detallada",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),
@@ -198,7 +198,7 @@ class _ReportCreatePageState extends State<ReportCreatePage> {
                       "Evidencia fotográfica (Opcional)",
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.textSecondary,
+                        color: Color(0xFF555555),
                         fontSize: 14,
                       ),
                     ),

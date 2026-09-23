@@ -118,7 +118,7 @@ class _HomePageState extends State<HomePage>
                       style: TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.text,
+                        color: Color(0xFF333333),
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -135,7 +135,7 @@ class _HomePageState extends State<HomePage>
                         'Tipo de emergencia',
                         style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: AppColors.text,
+                          color: Color(0xFF333333),
                         ),
                       ),
                     ),
@@ -207,7 +207,7 @@ class _HomePageState extends State<HomePage>
                         "Evidencia fotográfica (Opcional)",
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: AppColors.textSecondary,
+                          color: Color(0xFF555555),
                           fontSize: 13,
                         ),
                       ),
@@ -503,7 +503,7 @@ class _HomePageState extends State<HomePage>
                   Text(
                     message,
                     style: const TextStyle(
-                      color: AppColors.textSecondary,
+                      color: Color(0xFF616161),
                       height: 1.35,
                     ),
                   ),
@@ -677,7 +677,7 @@ class _HomePageState extends State<HomePage>
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: const Color(0xFF667EEA).withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, size: 32, color: AppColors.primary),
@@ -691,7 +691,7 @@ class _HomePageState extends State<HomePage>
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.text,
+                  color: Color(0xFF333333),
                 ),
               ),
             ),
@@ -737,7 +737,7 @@ class _HomePageState extends State<HomePage>
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
-                  color: AppColors.textSecondary,
+                  color: Color(0xFF555555),
                 ),
               ),
               const SizedBox(height: 6),
@@ -824,7 +824,7 @@ class _HomePageState extends State<HomePage>
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textSecondary,
+                    color: Color(0xFF555555),
                   ),
                 ),
               ),

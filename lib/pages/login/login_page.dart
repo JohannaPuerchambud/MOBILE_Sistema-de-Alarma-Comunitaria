@@ -201,17 +201,17 @@ class _LoginPageState extends State<LoginPage> {
                               style: TextStyle(
                                 fontSize: 24,
                                 fontWeight: FontWeight.bold,
-                                color: AppColors.text,
+                                color: Color(0xFF333333),
                               ),
                             ),
                           ),
                           const SizedBox(height: 28),
 
                           // Input de Correo
-                          Text(
+                          const Text(
                             "Correo Electrónico",
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF764BA2),
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -229,10 +229,10 @@ class _LoginPageState extends State<LoginPage> {
                           const SizedBox(height: 24),
 
                           // Input de Contraseña
-                          Text(
+                          const Text(
                             "Contraseña",
                             style: TextStyle(
-                              color: AppColors.primary,
+                              color: Color(0xFF764BA2),
                               fontWeight: FontWeight.bold,
                               fontSize: 15,
                             ),
@@ -281,14 +281,16 @@ class _LoginPageState extends State<LoginPage> {
                                 width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  color: AppColors.primary.withValues(alpha: 0.08),
+                                  color: const Color(
+                                    0xFF667EEA,
+                                  ).withValues(alpha: 0.08),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: Text(
                                   _statusMessage!,
                                   textAlign: TextAlign.center,
                                   style: const TextStyle(
-                                    color: AppColors.textSecondary,
+                                    color: Color(0xFF475569),
                                     height: 1.4,
                                   ),
                                 ),

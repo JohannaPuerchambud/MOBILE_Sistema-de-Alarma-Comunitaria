@@ -1,37 +1,26 @@
 import 'package:flutter/material.dart';
 
 abstract final class AppColors {
-  // ── Paleta principal (unificada con la app web Command Center) ──
-  static const primary = Color(0xFF2563EB);
-  static const primaryDark = Color(0xFF1E40AF);
-  static const primaryDeep = Color(0xFF0F172A);
-  static const messageSent = Color(0xFF3B82F6);
-
-  // ── Semánticos ──
-  static const emergency = Color(0xFFEF4444);
-  static const emergencyLight = Color(0xFFF87171);
+  static const primary = Color(0xFF667EEA);
+  static const messageSent = Color(0xFF5368A6);
+  static const secondary = Color(0xFF764BA2);
+  static const emergency = Color(0xFFD32F2F);
+  static const emergencyLight = Color(0xFFFF5252);
   static const report = Color(0xFFF59E0B);
-  static const success = Color(0xFF10B981);
-  static const warning = Color(0xFFF59E0B);
-
-  // ── Superficies ──
-  static const background = Color(0xFFF1F5F9);
+  static const success = Color(0xFF15803D);
+  static const warning = Color(0xFFB45309);
+  static const background = Color(0xFFF4F6F9);
   static const surface = Colors.white;
-  static const surfaceMuted = Color(0xFFF8FAFC);
-
-  // ── Textos ──
-  static const text = Color(0xFF0F172A);
-  static const textSecondary = Color(0xFF475569);
-  static const textMuted = Color(0xFF64748B);
-
-  // ── Bordes ──
-  static const border = Color(0xFFE2E8F0);
-  static const borderStrong = Color(0xFFCBD5E1);
+  static const surfaceMuted = Color(0xFFF8F9FA);
+  static const text = Color(0xFF1D2939);
+  static const textSecondary = Color(0xFF667085);
+  static const textMuted = Color(0xFF98A2B3);
+  static const border = Color(0xFFEAECF0);
 }
 
 abstract final class AppTheme {
   static const LinearGradient brandGradient = LinearGradient(
-    colors: [AppColors.primary, AppColors.primaryDark],
+    colors: [AppColors.primary, AppColors.secondary],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -40,7 +29,7 @@ abstract final class AppTheme {
     final scheme = ColorScheme.fromSeed(
       seedColor: AppColors.primary,
       primary: AppColors.primary,
-      secondary: AppColors.primaryDark,
+      secondary: AppColors.secondary,
       error: AppColors.emergency,
       surface: AppColors.surface,
     );

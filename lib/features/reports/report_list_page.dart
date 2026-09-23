@@ -114,10 +114,10 @@ class _ReportListPageState extends State<ReportListPage> {
     try {
       final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
       if (!opened && mounted) {
-        _showMessage('No se pudo abrir la ubicaciÃ³n.');
+        _showMessage('No se pudo abrir la ubicación.');
       }
     } catch (_) {
-      if (mounted) _showMessage('No se pudo abrir la ubicaciÃ³n.');
+      if (mounted) _showMessage('No se pudo abrir la ubicación.');
     }
   }
 
@@ -311,7 +311,7 @@ class _ReportListPageState extends State<ReportListPage> {
                   ),
                   const SizedBox(height: 14),
                   _DetailSection(
-                    label: 'INFORMACIÃ“N',
+                    label: 'INFORMACIÓN',
                     child: Column(
                       children: [
                         _DetailRow(
@@ -345,7 +345,7 @@ class _ReportListPageState extends State<ReportListPage> {
                         ),
                         icon: const Icon(Icons.map_outlined),
                         label: const Text(
-                          'Ver ubicaciÃ³n en Google Maps',
+                          'Ver ubicación en Google Maps',
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ),
@@ -381,10 +381,10 @@ class _ReportListPageState extends State<ReportListPage> {
             fontSize: 12,
             fontWeight: FontWeight.w700,
           ),
-          selectedColor: AppColors.primary,
+          selectedColor: const Color(0xFF667EEA),
           backgroundColor: Colors.white,
           side: BorderSide(
-            color: selected ? AppColors.primary : AppColors.border,
+            color: selected ? const Color(0xFF667EEA) : const Color(0xFFE4E7EC),
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -584,7 +584,7 @@ class _ReportListPageState extends State<ReportListPage> {
 
   Widget _buildEmptyState() {
     final message = switch (selectedFilter) {
-      _ActivityFilter.all => 'No hay actividad registrada todavÃ­a.',
+      _ActivityFilter.all => 'No hay actividad registrada todavía.',
       _ActivityFilter.reports => 'No hay reportes sospechosos.',
       _ActivityFilter.emergencies => 'No hay emergencias registradas.',
     };
@@ -597,7 +597,7 @@ class _ReportListPageState extends State<ReportListPage> {
         const SizedBox(height: 16),
         const Center(
           child: Text(
-            'Tu barrio estÃ¡ tranquilo',
+            'Tu barrio está tranquilo',
             style: TextStyle(
               color: Color(0xFF344054),
               fontSize: 18,
@@ -651,7 +651,7 @@ class _ReportListPageState extends State<ReportListPage> {
           Expanded(
             child: loading
                 ? const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
+                    child: CircularProgressIndicator(color: Color(0xFF667EEA)),
                   )
                 : error != null
                 ? AppStatusView(
@@ -663,7 +663,7 @@ class _ReportListPageState extends State<ReportListPage> {
                     color: AppColors.emergency,
                   )
                 : RefreshIndicator(
-                    color: AppColors.primary,
+                    color: const Color(0xFF667EEA),
                     onRefresh: _load,
                     child: visibleActivity.isEmpty
                         ? _buildEmptyState()
@@ -705,7 +705,7 @@ class _DetailSection extends StatelessWidget {
           Text(
             label,
             style: const TextStyle(
-              color: AppColors.primary,
+              color: Color(0xFF667EEA),
               fontSize: 11,
               fontWeight: FontWeight.w800,
               letterSpacing: 0.7,
@@ -737,7 +737,7 @@ class _DetailRow extends StatelessWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, color: AppColors.primary, size: 20),
+            Icon(icon, color: const Color(0xFF667EEA), size: 20),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
